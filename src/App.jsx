@@ -1156,3 +1156,42 @@ export default function App() {
                   <select value={purchSectorFilter} onChange={(e) => { setPurchSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setPurchProductId(first.id); }} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white">
                     <option value="Todos">Todos</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Buscar Cód ou Nome</label>
+                  <input type="text" value={purchSearchQuery} onChange={(e) => { setPurchSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (purchSectorFilter === 'Todos' || p.sector === purchSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setPurchProductId(first.id); }} placeholder="Digite..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Produto</label>
+                <select value={purchProductId} onChange={(e) => setPurchProductId(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-white">
+                  {purchFilteredProducts.map(p => (
+                    <option key={p.id} value={p.id}>[{p.code}] {p.name} ({p.sector})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Qtd a Comprar</label>
+                  <input type="number" min="1" required value={purchQtyToBuy} onChange={(e) => setPurchQtyToBuy(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Fornecedor</label>
+                  <input type="text" value={purchSupplier} onChange={(e) => setPurchSupplier(e.target.value)} placeholder="Nome..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onClick={() => setIsPurchaseModalOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-sm font-bold shadow-lg shadow-amber-500/20">Registar Pedido</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
