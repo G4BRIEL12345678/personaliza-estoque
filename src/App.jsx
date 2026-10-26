@@ -153,7 +153,7 @@ export default function App() {
   const [moveEmployee, setMoveEmployee] = useState('');
   const [moveNote, setMoveNote] = useState('');
 
-  // Modal e Pesquisa da Aba de Compras
+  // Compras
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchSectorFilter, setPurchSectorFilter] = useState('Todos');
   const [purchSearchQuery, setPurchSearchQuery] = useState('');
@@ -162,14 +162,14 @@ export default function App() {
   const [purchSupplier, setPurchSupplier] = useState('');
   const [purchStatusFilter, setPurchStatusFilter] = useState('Todos');
 
-  // Gestão de Funcionários
+  // Funcionários
   const [newEmployeeName, setNewEmployeeName] = useState('');
   const [selectedEmpForHistory, setSelectedEmpForHistory] = useState('Todos');
 
-  // Filtros da Aba de Resumo (Setor, Mês Específico, Período de Meses até 1 Ano)
+  // Resumo
   const [summarySector, setSummarySector] = useState('Todos');
-  const [summaryMonth, setSummaryMonth] = useState('Todos'); // 'YYYY-MM' ou 'Todos'
-  const [summaryPeriodMonths, setSummaryPeriodMonths] = useState('12'); // '1', '3', '6', '12'
+  const [summaryMonth, setSummaryMonth] = useState('Todos');
+  const [summaryPeriodMonths, setSummaryPeriodMonths] = useState('12');
 
   useEffect(() => {
     signInAnonymously(auth).catch((err) => console.error("Erro Auth:", err));
@@ -182,7 +182,6 @@ export default function App() {
     const prodRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
     const empRef = collection(db, 'artifacts', appId, 'public', 'data', 'employees');
 
-    // Popular 320 produtos se necessário
     getDocs(prodRef).then(async (snapshot) => {
       if (snapshot.size < 320) {
         const batch = writeBatch(db);
@@ -204,7 +203,6 @@ export default function App() {
       }
     }).catch(err => console.error("Erro seed produtos:", err));
 
-    // Sincronizar a lista exata de 38 funcionários da imagem
     getDocs(empRef).then(async (snapshot) => {
       const existingNames = snapshot.docs.map(d => d.data().name);
       const hasNewList = existingNames.includes("ADRIANO SANTIAGO MENDONCA");
@@ -260,7 +258,6 @@ export default function App() {
     };
   }, [user]);
 
-  // --- FUNÇÕES DE PRODUTOS ---
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (!formName.trim()) return;
@@ -275,13 +272,10 @@ export default function App() {
       stock: editingProduct ? Number(formInitialStock) : (Number(formInitialStock) || 0),
       updatedAt: new Date().toISOString()
     };
-
     try {
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), productData);
       closeModal();
-    } catch (err) {
-      alert("Erro ao salvar produto.");
-    }
+    } catch (err) { alert("Erro ao salvar produto."); }
   };
 
   const closeModal = () => {
@@ -308,7 +302,7 @@ export default function App() {
   };
 
   const handleDeleteProduct = async (id) => {
-    if (confirm("Tem certeza que deseja excluir este produto do sistema?")) {
+    if (confirm("Tem certeza que deseja excluir este produto?")) {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', id));
     }
   };
@@ -321,7 +315,6 @@ export default function App() {
     }, { merge: true });
   };
 
-  // --- MOVIMENTAÇÃO ---
   const moveFilteredProducts = products.filter(p => {
     const matchSector = moveSectorFilter === 'Todos' || p.sector === moveSectorFilter;
     const q = moveSearchQuery.toLowerCase().trim();
@@ -332,32 +325,17 @@ export default function App() {
   const handleSaveMovement = async (e) => {
     e.preventDefault();
     const product = products.find(p => p.id === moveProductId) || moveFilteredProducts[0];
-    if (!product) {
-      alert("Selecione um produto válido na lista.");
-      return;
-    }
-
+    if (!product) { alert("Selecione um produto."); return; }
     const qtyNum = Number(moveQty);
-    if (isNaN(qtyNum) || qtyNum <= 0) {
-      alert("Quantidade inválida.");
-      return;
-    }
-
-    if (moveType === 'Saída' && product.stock < qtyNum) {
-      alert(`Estoque insuficiente! Estoque disponível: ${product.stock}`);
-      return;
-    }
+    if (isNaN(qtyNum) || qtyNum <= 0) { alert("Quantidade inválida."); return; }
+    if (moveType === 'Saída' && product.stock < qtyNum) { alert(`Estoque insuficiente! Disponível: ${product.stock}`); return; }
 
     const newStock = moveType === 'Entrada' ? product.stock + qtyNum : product.stock - qtyNum;
-
     try {
       const batch = writeBatch(db);
-      const prodRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id);
-      batch.update(prodRef, { stock: newStock, updatedAt: new Date().toISOString() });
-
+      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), { stock: newStock, updatedAt: new Date().toISOString() });
       const movId = 'mov_' + Date.now();
-      const movRef = doc(db, 'artifacts', appId, 'public', 'data', 'movements', movId);
-      batch.set(movRef, {
+      batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'movements', movId), {
         productId: product.id,
         productCode: product.code || '-',
         productName: product.name,
@@ -369,19 +347,16 @@ export default function App() {
         note: moveNote.trim() || '-',
         date: new Date().toISOString()
       });
-
       await batch.commit();
       setIsMoveModalOpen(false);
       setMoveNote('');
       setMoveQty('1');
       setMoveSearchQuery('');
-    } catch (err) {
-      alert("Erro ao salvar movimentação.");
-    }
+    } catch (err) { alert("Erro ao salvar movimentação."); }
   };
 
   const handleDeleteMovement = async (mov) => {
-    if (!confirm("Deseja estornar e apagar esta movimentação? O estoque será revertido.")) return;
+    if (!confirm("Deseja estornar esta movimentação?")) return;
     const product = products.find(p => p.id === mov.productId);
     const batch = writeBatch(db);
     if (product) {
@@ -392,7 +367,6 @@ export default function App() {
     await batch.commit();
   };
 
-  // --- COMPRAS ---
   const purchFilteredProducts = products.filter(p => {
     const matchSector = purchSectorFilter === 'Todos' || p.sector === purchSectorFilter;
     const q = purchSearchQuery.toLowerCase().trim();
@@ -403,10 +377,7 @@ export default function App() {
   const handleCreatePurchaseOrder = async (e) => {
     e.preventDefault();
     const product = products.find(p => p.id === purchProductId) || purchFilteredProducts[0];
-    if (!product) {
-      alert("Selecione um produto válido.");
-      return;
-    }
+    if (!product) { alert("Selecione um produto."); return; }
     const qty = Number(purchQtyToBuy) || 1;
     const pId = 'purch_' + Date.now();
     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', pId), {
@@ -430,27 +401,15 @@ export default function App() {
 
   const handleUpdatePurchaseField = async (purch, field, value) => {
     try {
-      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
-        ...purch,
-        [field]: value
-      }, { merge: true });
-    } catch (err) {
-      console.error("Erro ao atualizar pedido:", err);
-    }
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), { ...purch, [field]: value }, { merge: true });
+    } catch (err) { console.error("Erro:", err); }
   };
 
   const handleEditBoughtQuantity = async (purch) => {
-    const inputQty = prompt(
-      `Alterar quantidade comprada de "${purch.productName}".\n(O saldo do estoque será ajustado automaticamente com a diferença):`,
-      purch.qtyBought || purch.qtyToBuy
-    );
+    const inputQty = prompt(`Alterar quantidade comprada de "${purch.productName}":`, purch.qtyBought || purch.qtyToBuy);
     if (inputQty === null) return;
     const newQtyBought = Number(inputQty);
-    if (isNaN(newQtyBought) || newQtyBought <= 0) {
-      alert("Informe uma quantidade válida maior que zero.");
-      return;
-    }
-
+    if (isNaN(newQtyBought) || newQtyBought <= 0) { alert("Quantidade inválida."); return; }
     const oldQtyBought = Number(purch.qtyBought) || 0;
     const diff = newQtyBought - oldQtyBought;
     if (diff === 0) return;
@@ -459,59 +418,31 @@ export default function App() {
     const batch = writeBatch(db);
     const nowIso = new Date().toISOString();
 
-    batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
-      qtyBought: newQtyBought,
-      updatedAt: nowIso
-    });
-
+    batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), { qtyBought: newQtyBought, updatedAt: nowIso });
     if (product) {
-      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), {
-        stock: Math.max(0, (Number(product.stock) || 0) + diff),
-        updatedAt: nowIso
-      });
+      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), { stock: Math.max(0, (Number(product.stock) || 0) + diff), updatedAt: nowIso });
     }
-
-    if (purch.movementId) {
-      const movExists = movements.some(m => m.id === purch.movementId);
-      if (movExists) {
-        batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'movements', purch.movementId), {
-          qty: newQtyBought,
-          note: `Entrada Automática de Compra (Qtd ajustada para ${newQtyBought} - Fornecedor: ${purch.supplier || '-'})`
-        });
-      }
+    if (purch.movementId && movements.some(m => m.id === purch.movementId)) {
+      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'movements', purch.movementId), { qty: newQtyBought });
     }
-
     await batch.commit();
   };
 
   const handleConfirmPurchaseReceived = async (purch) => {
-    const inputQty = prompt(`Confirmar recebimento de "${purch.productName}".\nQuantidade comprada que entrará no estoque:`, purch.qtyToBuy);
+    const inputQty = prompt(`Confirmar recebimento de "${purch.productName}":`, purch.qtyToBuy);
     if (inputQty === null) return;
     const qtyBought = Number(inputQty);
-    if (isNaN(qtyBought) || qtyBought <= 0) {
-      alert("Informe uma quantidade válida maior que zero.");
-      return;
-    }
+    if (isNaN(qtyBought) || qtyBought <= 0) { alert("Quantidade inválida."); return; }
 
     const product = products.find(p => p.id === purch.productId);
     const batch = writeBatch(db);
     const nowIso = new Date().toISOString();
     const movId = 'mov_purch_' + Date.now();
 
-    batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
-      status: 'COMPRADO',
-      qtyBought: qtyBought,
-      purchaseDate: nowIso,
-      movementId: movId
-    });
-
+    batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), { status: 'COMPRADO', qtyBought: qtyBought, purchaseDate: nowIso, movementId: movId });
     if (product) {
-      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), {
-        stock: (Number(product.stock) || 0) + qtyBought,
-        updatedAt: nowIso
-      });
+      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), { stock: (Number(product.stock) || 0) + qtyBought, updatedAt: nowIso });
     }
-
     batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'movements', movId), {
       productId: purch.productId,
       productCode: purch.productCode || '-',
@@ -524,22 +455,20 @@ export default function App() {
       note: `Entrada Automática de Compra (Fornecedor: ${purch.supplier || '-'})`,
       date: nowIso
     });
-
     await batch.commit();
   };
 
   const handleDeletePurchase = async (id) => {
-    if (confirm("Deseja remover este item da lista de compras?")) {
+    if (confirm("Deseja remover este pedido?")) {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', id));
     }
   };
 
   const sendProductToPurchases = async (prod) => {
     const suggestedQty = Math.max(1, (prod.minStock || 5) - (prod.stock || 0));
-    const inputQty = prompt(`Adicionar "${prod.name}" à lista de compras.\nQual a quantidade a comprar?:`, suggestedQty);
+    const inputQty = prompt(`Adicionar "${prod.name}" à lista de compras. Qtd:`, suggestedQty);
     if (inputQty === null) return;
     const finalQty = Math.max(1, Number(inputQty) || suggestedQty);
-
     const pId = 'purch_' + Date.now();
     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', pId), {
       productId: prod.id,
@@ -552,12 +481,11 @@ export default function App() {
       purchaseDate: null,
       qtyBought: 0,
       status: 'AGUARDANDO',
-      note: 'Gerado a partir da aba de Estoque'
+      note: 'Gerado do Estoque'
     });
-    alert(`"${prod.name}" (${finalQty} un.) foi adicionado à aba COMPRAS!`);
+    alert(`Adicionado com sucesso às Compras!`);
   };
 
-  // --- FUNCIONÁRIOS ---
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     if (!newEmployeeName.trim()) return;
@@ -570,31 +498,24 @@ export default function App() {
   };
 
   const handleDeleteEmployee = async (emp) => {
-    if (confirm(`Deseja excluir o funcionário "${emp.name}" da lista?`)) {
+    if (confirm(`Excluir funcionário "${emp.name}"?`)) {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', emp.id));
       if (selectedEmpForHistory === emp.name) setSelectedEmpForHistory('Todos');
     }
   };
 
-  // --- EXPORTAÇÃO CSV ---
   const exportCSV = () => {
     let csvContent = "\uFEFF";
     csvContent += "=== RELAÇÃO DE ENTRADAS DE PRODUTOS ===\n";
     csvContent += "Data/Hora;Código;Produto;Setor;Classificação;Quantidade;Observação\n";
-    
-    const entradas = movements.filter(m => m.type === 'Entrada');
-    entradas.forEach(m => {
+    movements.filter(m => m.type === 'Entrada').forEach(m => {
       csvContent += `"${new Date(m.date).toLocaleString('pt-BR')}";"${m.productCode || '-'}";"${m.productName}";"${m.sector}";"${m.classification || 'Matéria Prima'}";${m.qty};"${m.note}"\n`;
     });
-
     csvContent += "\n=== RELAÇÃO DE SAÍDAS E RETIRADAS / EPI ===\n";
     csvContent += "Data/Hora;Código;Produto;Setor;Classificação;Quantidade;Funcionário;Observação\n";
-    
-    const saidas = movements.filter(m => m.type === 'Saída');
-    saidas.forEach(m => {
+    movements.filter(m => m.type === 'Saída').forEach(m => {
       csvContent += `"${new Date(m.date).toLocaleString('pt-BR')}";"${m.productCode || '-'}";"${m.productName}";"${m.sector}";"${m.classification || 'Matéria Prima'}";${m.qty};"${m.employee}";"${m.note}"\n`;
     });
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -602,7 +523,6 @@ export default function App() {
     link.click();
   };
 
-  // --- LÓGICA DE FILTRAGEM DA ABA RESUMO (SECTOR, MONTH, PERIOD MONTHS) ---
   const filteredProducts = products.filter(p => {
     const q = searchTerm.toLowerCase().trim();
     const matchNameOrCode = !q || p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase().includes(q);
@@ -611,36 +531,23 @@ export default function App() {
     return matchNameOrCode && matchSector && matchClass;
   });
 
-  // Lista de meses disponíveis nas movimentações (formato 'YYYY-MM')
-  const availableMonths = Array.from(new Set(movements.map(m => {
-    if (!m.date) return null;
-    return m.date.slice(0, 7);
-  }))).filter(Boolean).sort().reverse();
+  const availableMonths = Array.from(new Set(movements.map(m => m.date ? m.date.slice(0, 7) : null))).filter(Boolean).sort().reverse();
 
-  // Filtrar movimentos para a aba de resumo com base em Setor, Mês Específico e Período (até 1 ano)
   const filteredMovementsForSummary = movements.filter(m => {
-    // Filtro de Setor
     if (summarySector !== 'Todos' && m.sector !== summarySector) return false;
-
     if (!m.date) return false;
     const movDate = new Date(m.date);
-
-    // Filtro de Mês Específico
     if (summaryMonth !== 'Todos') {
-      const movMonthStr = m.date.slice(0, 7);
-      if (movMonthStr !== summaryMonth) return false;
+      if (m.date.slice(0, 7) !== summaryMonth) return false;
     } else {
-      // Filtro de Período em Meses (1 a 12 meses / 1 ano)
       const monthsLimit = Number(summaryPeriodMonths) || 12;
       const now = new Date();
       const cutoffDate = new Date(now.getFullYear(), now.getMonth() - monthsLimit, 1);
       if (movDate < cutoffDate) return false;
     }
-
     return true;
   });
 
-  // Produtos com Estoque Mínimo (com base no filtro de setor da aba Resumo, se houver)
   const lowStockProducts = products.filter(p => {
     if (summarySector !== 'Todos' && p.sector !== summarySector) return false;
     return (p.stock || 0) <= (p.minStock || 5);
@@ -651,69 +558,77 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#2D1B12] text-[#FDFBF7] flex flex-col items-center justify-center font-sans">
-        <div className="w-12 h-12 border-4 border-[#C5A880] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-xl tracking-wide font-medium text-[#C5A880]">Personaliza - Sincronizando Dados e Relatórios...</p>
+      <div className="min-h-screen bg-[#111827] text-white flex flex-col items-center justify-center font-sans">
+        <div className="w-14 h-14 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-xl tracking-wide font-medium text-amber-400">Personaliza — Carregando Sistema Executivo...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#2D1B12] font-sans flex flex-col">
-      <header className="bg-[#2D1B12] text-[#FDFBF7] border-b border-[#C5A880]/30 shadow-lg px-6 py-4 flex flex-col lg:flex-row justify-between items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-wider text-[#FDFBF7]">PERSONALIZA</h1>
-          <p className="text-xs text-[#C5A880] tracking-widest uppercase">Gestão Completa de Estoque, Compras e EPIs</p>
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+      {/* HEADER PROFISSIONAL EXECUTIVO */}
+      <header className="bg-slate-950 border-b border-slate-800 shadow-2xl px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-40 backdrop-blur-md bg-slate-950/90">
+        <div className="flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
+            P
+          </div>
+          <div>
+            <h1 className="text-xl font-black tracking-widest text-white uppercase flex items-center gap-2">
+              Personaliza <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">PRO</span>
+            </h1>
+            <p className="text-xs text-slate-400 font-medium">Painel Executivo de Gestão de Estoque & Suprimentos</p>
+          </div>
         </div>
 
-        <nav className="flex flex-wrap gap-2 bg-[#1F120B] p-1.5 rounded-xl border border-[#C5A880]/20">
-          <button onClick={() => setActiveTab('estoque')} className={`px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${activeTab === 'estoque' ? 'bg-[#C5A880] text-[#2D1B12] shadow' : 'text-[#FDFBF7]/80 hover:text-white'}`}>
-            Estoque ({products.length})
+        <nav className="flex flex-wrap gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-inner">
+          <button onClick={() => setActiveTab('estoque')} className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${activeTab === 'estoque' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`}>
+            📦 Estoque ({products.length})
           </button>
-          <button onClick={() => setActiveTab('movimentacao')} className={`px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${activeTab === 'movimentacao' ? 'bg-[#C5A880] text-[#2D1B12] shadow' : 'text-[#FDFBF7]/80 hover:text-white'}`}>
-            Movimentação ({movements.length})
+          <button onClick={() => setActiveTab('movimentacao')} className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${activeTab === 'movimentacao' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`}>
+            🔄 Movimentação
           </button>
-          <button onClick={() => setActiveTab('compras')} className={`px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${activeTab === 'compras' ? 'bg-[#C5A880] text-[#2D1B12] shadow' : 'text-[#FDFBF7]/80 hover:text-white'}`}>
-            Compras {pendingPurchasesCount > 0 && `(${pendingPurchasesCount})`}
+          <button onClick={() => setActiveTab('compras')} className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all relative ${activeTab === 'compras' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`}>
+            🛒 Compras {pendingPurchasesCount > 0 && <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black animate-pulse">{pendingPurchasesCount}</span>}
           </button>
-          <button onClick={() => setActiveTab('funcionarios')} className={`px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${activeTab === 'funcionarios' ? 'bg-[#C5A880] text-[#2D1B12] shadow' : 'text-[#FDFBF7]/80 hover:text-white'}`}>
-            Funcionários / EPI ({employees.length})
+          <button onClick={() => setActiveTab('funcionarios')} className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${activeTab === 'funcionarios' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`}>
+            👥 Funcionários
           </button>
-          <button onClick={() => setActiveTab('resumo')} className={`px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${activeTab === 'resumo' ? 'bg-[#C5A880] text-[#2D1B12] shadow' : 'text-[#FDFBF7]/80 hover:text-white'}`}>
-            Resumo e Relatórios {lowStockCount > 0 && `(${lowStockCount})`}
+          <button onClick={() => setActiveTab('resumo')} className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all relative ${activeTab === 'resumo' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`}>
+            📊 Resumo {lowStockCount > 0 && <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">{lowStockCount}</span>}
           </button>
         </nav>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
         {/* ABA 1: ESTOQUE */}
         {activeTab === 'estoque' && (
           <div className="space-y-6">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2.5">
               {['Todos', ...SECTORS].map(sec => (
                 <button
                   key={sec}
                   onClick={() => setFilterSector(sec)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition ${filterSector === sec ? 'bg-[#2D1B12] text-[#FDFBF7] border-[#2D1B12]' : 'bg-white text-[#2D1B12] border-[#C5A880]/40 hover:bg-[#C5A880]/10'}`}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all shadow-sm ${filterSector === sec ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-amber-500/20 scale-105' : 'bg-slate-950/60 text-slate-300 border-slate-800 hover:bg-slate-800'}`}
                 >
-                  {sec === 'Todos' ? `Todos (${products.length})` : `${sec} (${products.filter(p => p.sector === sec).length})`}
+                  {sec === 'Todos' ? `Todos os Setores (${products.length})` : `${sec} (${products.filter(p => p.sector === sec).length})`}
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-[#C5A880]/20">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg">
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <input 
                   type="text" 
-                  placeholder="Pesquisar por código ou nome do produto..." 
+                  placeholder="🔍 Pesquisar por código ou nome do produto..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full md:w-80 px-4 py-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm focus:outline-none"
+                  className="w-full md:w-96 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
                 />
                 <select 
                   value={filterClassification} 
                   onChange={(e) => setFilterClassification(e.target.value)}
-                  className="py-2 px-3 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm"
+                  className="py-3 px-4 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:outline-none focus:border-amber-500"
                 >
                   <option value="Todas">Todas Classificações</option>
                   <option value="Matéria Prima">Matéria Prima</option>
@@ -721,28 +636,22 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="flex gap-2 w-full md:w-auto">
-                <button 
-                  onClick={() => { setMoveType('Entrada'); setMoveSectorFilter(filterSector); setIsMoveModalOpen(true); }}
-                  className="bg-[#C5A880] text-[#2D1B12] px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-[#b5966d] transition shadow"
-                >
-                  + Lançar Entrada/Saída
+              <div className="flex gap-2.5 w-full md:w-auto">
+                <button onClick={() => { setMoveType('Entrada'); setMoveSectorFilter(filterSector); setIsMoveModalOpen(true); }} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
+                  + Lançar Movimento
                 </button>
-                <button 
-                  onClick={() => { setEditingProduct(null); setFormCode(''); setFormName(''); setFormSector(filterSector === 'Todos' ? 'SUBLIMAÇÃO' : filterSector); setFormMinStock('5'); setFormInitialStock('0'); setIsModalOpen(true); }}
-                  className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#3D261A] transition shadow"
-                >
+                <button onClick={() => { setEditingProduct(null); setFormCode(''); setFormName(''); setFormSector(filterSector === 'Todos' ? 'SUBLIMAÇÃO' : filterSector); setFormMinStock('5'); setFormInitialStock('0'); setIsModalOpen(true); }} className="bg-slate-800 text-white px-5 py-3 rounded-xl font-semibold text-sm hover:bg-slate-700 transition border border-slate-700 shadow-lg">
                   + Novo Produto
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-[#C5A880]/20 overflow-hidden">
+            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#2D1B12]/5 text-[#2D1B12] border-b border-[#C5A880]/20 text-xs uppercase tracking-wider font-bold">
-                      <th className="p-4">Código</th>
+                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
+                      <th className="p-4">Cód.</th>
                       <th className="p-4">Descrição do Produto</th>
                       <th className="p-4">Setor</th>
                       <th className="p-4">Unid.</th>
@@ -753,35 +662,35 @@ export default function App() {
                       <th className="p-4 text-right">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 text-sm">
+                  <tbody className="divide-y divide-slate-800/60 text-sm">
                     {filteredProducts.length === 0 ? (
-                      <tr><td colSpan="9" className="p-8 text-center text-gray-400">Nenhum produto encontrado.</td></tr>
+                      <tr><td colSpan="9" className="p-10 text-center text-slate-500 font-medium">Nenhum produto encontrado.</td></tr>
                     ) : (
                       filteredProducts.map(prod => {
                         const isLow = prod.stock <= prod.minStock;
                         return (
-                          <tr key={prod.id} className="hover:bg-[#FDFBF7]/80 transition">
-                            <td className="p-4 text-xs font-bold text-[#2D1B12] bg-gray-50/50">{prod.code || '-'}</td>
-                            <td className="p-4 font-semibold text-[#2D1B12]">{prod.name}</td>
-                            <td className="p-4"><span className="bg-[#C5A880]/20 text-[#2D1B12] px-2.5 py-1 rounded-lg text-xs font-bold">{prod.sector}</span></td>
-                            <td className="p-4 text-xs text-gray-500 font-bold">{prod.unit || 'UN'}</td>
+                          <tr key={prod.id} className="hover:bg-slate-800/40 transition">
+                            <td className="p-4 text-xs font-mono font-bold text-amber-400 bg-slate-900/40">{prod.code || '-'}</td>
+                            <td className="p-4 font-bold text-slate-100">{prod.name}</td>
+                            <td className="p-4"><span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-lg text-xs font-bold border border-slate-700">{prod.sector}</span></td>
+                            <td className="p-4 text-xs text-slate-400 font-bold">{prod.unit || 'UN'}</td>
                             <td className="p-4">
-                              <select value={prod.classification || 'Matéria Prima'} onChange={(e) => handleUpdateField(prod, 'classification', e.target.value)} className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs font-medium">
+                              <select value={prod.classification || 'Matéria Prima'} onChange={(e) => handleUpdateField(prod, 'classification', e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-300">
                                 <option value="Matéria Prima">Matéria Prima</option>
                                 <option value="Consumo">Consumo</option>
                               </select>
                             </td>
-                            <td className="p-4 text-center font-bold text-base">{prod.stock}</td>
+                            <td className="p-4 text-center font-black text-base text-white">{prod.stock}</td>
                             <td className="p-4 text-center">
-                              <input type="number" key={`min_${prod.id}_${prod.minStock}`} defaultValue={prod.minStock} onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)} className="w-16 text-center bg-gray-50 border border-gray-200 rounded-lg py-1 text-xs font-semibold" />
+                              <input type="number" key={`min_${prod.id}_${prod.minStock}`} defaultValue={prod.minStock} onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)} className="w-16 text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs font-bold text-slate-200" />
                             </td>
                             <td className="p-4 text-center">
-                              {isLow ? <span className="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-bold">REPOR</span> : <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-bold">OK</span>}
+                              {isLow ? <span className="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-black tracking-wide">REPOR</span> : <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-black tracking-wide">OK</span>}
                             </td>
-                            <td className="p-4 text-right space-x-1 whitespace-nowrap">
-                              <button onClick={() => sendProductToPurchases(prod)} className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold hover:bg-amber-200">Comprar</button>
-                              <button onClick={() => openEditProduct(prod)} className="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200">Editar</button>
-                              <button onClick={() => handleDeleteProduct(prod.id)} className="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-100">Excluir</button>
+                            <td className="p-4 text-right space-x-1.5 whitespace-nowrap">
+                              <button onClick={() => sendProductToPurchases(prod)} className="px-3 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-bold hover:bg-amber-500 hover:text-slate-950 transition">Comprar</button>
+                              <button onClick={() => openEditProduct(prod)} className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700 transition">Editar</button>
+                              <button onClick={() => handleDeleteProduct(prod.id)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20 transition">Excluir</button>
                             </td>
                           </tr>
                         );
@@ -797,21 +706,21 @@ export default function App() {
         {/* ABA 2: MOVIMENTAÇÃO */}
         {activeTab === 'movimentacao' && (
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-[#C5A880]/20">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg">
               <div>
-                <h2 className="text-lg font-bold text-[#2D1B12]">Histórico de Entradas e Saídas</h2>
-                <p className="text-xs text-gray-500">Pesquise o produto pelo código, nome ou setor na hora de lançar.</p>
+                <h2 className="text-lg font-bold text-white">Histórico Executivo de Movimentações</h2>
+                <p className="text-xs text-slate-400">Registo completo de todas as entradas, consumo e retiradas por funcionários.</p>
               </div>
-              <button onClick={() => { setMoveType('Entrada'); setIsMoveModalOpen(true); }} className="bg-[#2D1B12] text-[#FDFBF7] px-5 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow">
+              <button onClick={() => { setMoveType('Entrada'); setIsMoveModalOpen(true); }} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
                 + Nova Movimentação
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-[#C5A880]/20 overflow-hidden">
+            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#2D1B12]/5 text-[#2D1B12] border-b border-[#C5A880]/20 text-xs uppercase tracking-wider font-bold">
+                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
                       <th className="p-4">Data / Hora</th>
                       <th className="p-4">Tipo</th>
                       <th className="p-4">Cód.</th>
@@ -823,21 +732,21 @@ export default function App() {
                       <th className="p-4 text-right">Ação</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 text-sm">
+                  <tbody className="divide-y divide-slate-800/60 text-sm">
                     {movements.length === 0 ? (
-                      <tr><td colSpan="9" className="p-8 text-center text-gray-400">Nenhuma movimentação registada.</td></tr>
+                      <tr><td colSpan="9" className="p-10 text-center text-slate-500 font-medium">Nenhuma movimentação registada.</td></tr>
                     ) : (
                       movements.map(mov => (
-                        <tr key={mov.id} className="hover:bg-[#FDFBF7]/60 transition">
-                          <td className="p-4 text-xs text-gray-500">{new Date(mov.date).toLocaleString('pt-BR')}</td>
-                          <td className="p-4"><span className={`px-2.5 py-1 rounded-full text-xs font-bold ${mov.type === 'Entrada' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{mov.type}</span></td>
-                          <td className="p-4 text-xs font-bold text-gray-500">{mov.productCode || '-'}</td>
-                          <td className="p-4 font-semibold text-[#2D1B12]">{mov.productName}</td>
-                          <td className="p-4 text-xs font-bold text-gray-600">{mov.sector}</td>
-                          <td className="p-4 text-center font-bold text-base">{mov.qty}</td>
-                          <td className="p-4 text-xs font-bold text-[#2D1B12]">{mov.employee || '-'}</td>
-                          <td className="p-4 text-xs text-gray-500">{mov.note}</td>
-                          <td className="p-4 text-right"><button onClick={() => handleDeleteMovement(mov)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">Estornar</button></td>
+                        <tr key={mov.id} className="hover:bg-slate-800/40 transition">
+                          <td className="p-4 text-xs text-slate-400">{new Date(mov.date).toLocaleString('pt-BR')}</td>
+                          <td className="p-4"><span className={`px-3 py-1 rounded-full text-xs font-black tracking-wide ${mov.type === 'Entrada' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'}`}>{mov.type}</span></td>
+                          <td className="p-4 text-xs font-mono font-bold text-slate-400">{mov.productCode || '-'}</td>
+                          <td className="p-4 font-bold text-slate-100">{mov.productName}</td>
+                          <td className="p-4 text-xs font-bold text-slate-300">{mov.sector}</td>
+                          <td className="p-4 text-center font-black text-base text-white">{mov.qty}</td>
+                          <td className="p-4 text-xs font-bold text-amber-400">{mov.employee || '-'}</td>
+                          <td className="p-4 text-xs text-slate-400">{mov.note}</td>
+                          <td className="p-4 text-right"><button onClick={() => handleDeleteMovement(mov)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20 transition">Estornar</button></td>
                         </tr>
                       ))
                     )}
@@ -851,28 +760,28 @@ export default function App() {
         {/* ABA 3: COMPRAS */}
         {activeTab === 'compras' && (
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-[#C5A880]/20">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg">
               <div>
-                <h2 className="text-lg font-bold text-[#2D1B12]">Gestão de Compras e Reposição</h2>
-                <p className="text-xs text-gray-500">Altere a quantidade a comprar ou fornecedor a qualquer momento.</p>
+                <h2 className="text-lg font-bold text-white">Central de Suprimentos & Compras</h2>
+                <p className="text-xs text-slate-400">Edite quantidades a comprar ou fornecedores diretamente na tabela a qualquer momento.</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <select value={purchStatusFilter} onChange={(e) => setPurchStatusFilter(e.target.value)} className="py-2 px-3 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm font-semibold">
+              <div className="flex flex-wrap gap-2.5">
+                <select value={purchStatusFilter} onChange={(e) => setPurchStatusFilter(e.target.value)} className="py-2.5 px-4 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200">
                   <option value="Todos">Todos os Status</option>
                   <option value="AGUARDANDO">Aguardando Compra</option>
                   <option value="COMPRADO">Comprado / Recebido</option>
                 </select>
-                <button onClick={() => setIsPurchaseModalOpen(true)} className="bg-[#2D1B12] text-[#FDFBF7] px-5 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow text-sm">
-                  + Adicionar Pedido de Compra
+                <button onClick={() => setIsPurchaseModalOpen(true)} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
+                  + Pedido de Compra
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-[#C5A880]/20 overflow-hidden">
+            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#2D1B12]/5 text-[#2D1B12] border-b border-[#C5A880]/20 text-xs uppercase tracking-wider font-bold">
+                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
                       <th className="p-4">Data Pedido</th>
                       <th className="p-4">Setor</th>
                       <th className="p-4">Cód.</th>
@@ -885,39 +794,39 @@ export default function App() {
                       <th className="p-4 text-right">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 text-sm">
+                  <tbody className="divide-y divide-slate-800/60 text-sm">
                     {purchases.filter(p => purchStatusFilter === 'Todos' || p.status === purchStatusFilter).length === 0 ? (
-                      <tr><td colSpan="10" className="p-8 text-center text-gray-400">Nenhum pedido de compra.</td></tr>
+                      <tr><td colSpan="10" className="p-10 text-center text-slate-500 font-medium">Nenhum pedido de compra registado.</td></tr>
                     ) : (
                       purchases
                         .filter(p => purchStatusFilter === 'Todos' || p.status === purchStatusFilter)
                         .map(purch => (
-                          <tr key={purch.id} className="hover:bg-[#FDFBF7]/60 transition">
-                            <td className="p-4 text-xs text-gray-500">{new Date(purch.orderDate).toLocaleDateString('pt-BR')}</td>
-                            <td className="p-4 text-xs font-bold">{purch.sector}</td>
-                            <td className="p-4 text-xs font-bold text-gray-500">{purch.productCode}</td>
-                            <td className="p-4 font-semibold text-[#2D1B12]">{purch.productName}</td>
+                          <tr key={purch.id} className="hover:bg-slate-800/40 transition">
+                            <td className="p-4 text-xs text-slate-400">{new Date(purch.orderDate).toLocaleDateString('pt-BR')}</td>
+                            <td className="p-4 text-xs font-bold text-slate-300">{purch.sector}</td>
+                            <td className="p-4 text-xs font-mono text-slate-400">{purch.productCode}</td>
+                            <td className="p-4 font-bold text-slate-100">{purch.productName}</td>
                             <td className="p-4 text-center">
-                              <input type="number" min="1" key={`qty_${purch.id}_${purch.qtyToBuy}`} defaultValue={purch.qtyToBuy} onBlur={(e) => { const val = Math.max(1, Number(e.target.value) || 1); if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-20 text-center bg-[#FDFBF7] border border-[#C5A880]/60 rounded-lg py-1.5 px-2 text-sm font-bold text-[#2D1B12]" />
+                              <input type="number" min="1" key={`qty_${purch.id}_${purch.qtyToBuy}`} defaultValue={purch.qtyToBuy} onBlur={(e) => { const val = Math.max(1, Number(e.target.value) || 1); if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-20 text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-sm font-bold text-amber-400" />
                             </td>
                             <td className="p-4">
-                              <input type="text" key={`sup_${purch.id}_${purch.supplier}`} defaultValue={purch.supplier === '-' ? '' : purch.supplier} placeholder="Fornecedor..." onBlur={(e) => { const val = e.target.value.trim() || '-'; if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-36 bg-[#FDFBF7] border border-gray-200 rounded-lg py-1 px-2 text-xs text-gray-700" />
+                              <input type="text" key={`sup_${purch.id}_${purch.supplier}`} defaultValue={purch.supplier === '-' ? '' : purch.supplier} placeholder="Fornecedor..." onBlur={(e) => { const val = e.target.value.trim() || '-'; if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-36 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-slate-200" />
                             </td>
-                            <td className="p-4 text-xs text-gray-500">{purch.purchaseDate ? new Date(purch.purchaseDate).toLocaleDateString('pt-BR') : '-'}</td>
-                            <td className="p-4 text-center font-bold text-green-700">
+                            <td className="p-4 text-xs text-slate-400">{purch.purchaseDate ? new Date(purch.purchaseDate).toLocaleDateString('pt-BR') : '-'}</td>
+                            <td className="p-4 text-center font-bold text-emerald-400">
                               {purch.status === 'COMPRADO' ? (
-                                <div className="flex items-center justify-center gap-1.5">
+                                <div className="flex items-center justify-center gap-2">
                                   <span>{purch.qtyBought}</span>
-                                  <button onClick={() => handleEditBoughtQuantity(purch)} className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[#2D1B12] rounded text-[11px] font-semibold border">Alterar Qtd</button>
+                                  <button onClick={() => handleEditBoughtQuantity(purch)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-bold border border-slate-700">Alterar</button>
                                 </div>
                               ) : '-'}
                             </td>
                             <td className="p-4 text-center">
-                              {purch.status === 'COMPRADO' ? <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">COMPRADO</span> : <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold">AGUARDANDO</span>}
+                              {purch.status === 'COMPRADO' ? <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-black">COMPRADO</span> : <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-black">AGUARDANDO</span>}
                             </td>
                             <td className="p-4 text-right space-x-2 whitespace-nowrap">
-                              {purch.status === 'AGUARDANDO' && <button onClick={() => handleConfirmPurchaseReceived(purch)} className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700">Confirmar</button>}
-                              <button onClick={() => handleDeletePurchase(purch.id)} className="px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">Excluir</button>
+                              {purch.status === 'AGUARDANDO' && <button onClick={() => handleConfirmPurchaseReceived(purch)} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-500 shadow-md">Confirmar</button>}
+                              <button onClick={() => handleDeletePurchase(purch.id)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20">Excluir</button>
                             </td>
                           </tr>
                         ))
@@ -932,34 +841,34 @@ export default function App() {
         {/* ABA 4: FUNCIONÁRIOS */}
         {activeTab === 'funcionarios' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-5">
+            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-5">
               <div>
-                <h2 className="text-lg font-bold text-[#2D1B12]">Equipa de Funcionários ({employees.length})</h2>
-                <p className="text-xs text-gray-500">Adicione ou exclua colaboradores abaixo.</p>
+                <h2 className="text-lg font-bold text-white">Equipa ({employees.length})</h2>
+                <p className="text-xs text-slate-400">Gestão de colaboradores para registo de EPIs.</p>
               </div>
 
               <form onSubmit={handleAddEmployee} className="flex gap-2">
-                <input type="text" placeholder="Nome completo..." value={newEmployeeName} onChange={(e) => setNewEmployeeName(e.target.value)} className="flex-1 px-3 py-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm focus:outline-none" />
-                <button type="submit" className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#3D261A] whitespace-nowrap">+ Adicionar</button>
+                <input type="text" placeholder="Nome do funcionário..." value={newEmployeeName} onChange={(e) => setNewEmployeeName(e.target.value)} className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+                <button type="submit" className="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-black hover:bg-amber-400 transition whitespace-nowrap">+ Adicionar</button>
               </form>
 
-              <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100 border rounded-xl">
+              <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-800 border border-slate-800 rounded-xl bg-slate-900/40">
                 {employees.map(emp => (
-                  <div key={emp.id} className="p-3 flex justify-between items-center hover:bg-gray-50 gap-2">
-                    <button onClick={() => setSelectedEmpForHistory(emp.name)} className={`text-xs font-bold text-left flex-1 ${selectedEmpForHistory === emp.name ? 'text-[#C5A880] underline' : 'text-[#2D1B12]'}`}>{emp.name}</button>
-                    <button onClick={() => handleDeleteEmployee(emp)} className="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg font-semibold">Excluir</button>
+                  <div key={emp.id} className="p-3.5 flex justify-between items-center hover:bg-slate-800/40 gap-2">
+                    <button onClick={() => setSelectedEmpForHistory(emp.name)} className={`text-xs font-bold text-left flex-1 tracking-wide ${selectedEmpForHistory === emp.name ? 'text-amber-400 underline font-black' : 'text-slate-200'}`}>{emp.name}</button>
+                    <button onClick={() => handleDeleteEmployee(emp)} className="text-xs text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 px-2.5 py-1 rounded-lg font-bold border border-rose-500/20">Excluir</button>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
+            <div className="lg:col-span-2 bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-[#2D1B12]">Histórico de Retiradas / EPIs por Funcionário</h3>
-                  <p className="text-xs text-gray-500">Filtre por colaborador.</p>
+                  <h3 className="text-lg font-bold text-white">Histórico de EPIs e Retiradas</h3>
+                  <p className="text-xs text-slate-400">Selecione o colaborador para auditar o consumo.</p>
                 </div>
-                <select value={selectedEmpForHistory} onChange={(e) => setSelectedEmpForHistory(e.target.value)} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-xs font-bold">
+                <select value={selectedEmpForHistory} onChange={(e) => setSelectedEmpForHistory(e.target.value)} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                   <option value="Todos">Todos os Funcionários</option>
                   {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
                 </select>
@@ -968,7 +877,7 @@ export default function App() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-gray-50 text-gray-700 text-xs uppercase font-bold">
+                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
                       <th className="p-3">Data</th>
                       <th className="p-3">Funcionário</th>
                       <th className="p-3">Cód.</th>
@@ -978,18 +887,18 @@ export default function App() {
                       <th className="p-3">Observação</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-800/60">
                     {movements
                       .filter(m => m.type === 'Saída' && m.employee && m.employee !== '-' && (selectedEmpForHistory === 'Todos' || m.employee === selectedEmpForHistory))
                       .map(m => (
-                        <tr key={m.id} className="hover:bg-gray-50">
-                          <td className="p-3 text-xs text-gray-500">{new Date(m.date).toLocaleString('pt-BR')}</td>
-                          <td className="p-3 font-bold text-[#2D1B12] text-xs">{m.employee}</td>
-                          <td className="p-3 text-xs text-gray-500">{m.productCode || '-'}</td>
-                          <td className="p-3 font-semibold">{m.productName}</td>
-                          <td className="p-3 text-xs">{m.sector}</td>
-                          <td className="p-3 text-center font-bold text-orange-700">-{m.qty}</td>
-                          <td className="p-3 text-xs text-gray-500">{m.note}</td>
+                        <tr key={m.id} className="hover:bg-slate-800/40">
+                          <td className="p-3 text-xs text-slate-400">{new Date(m.date).toLocaleString('pt-BR')}</td>
+                          <td className="p-3 font-bold text-amber-400 text-xs">{m.employee}</td>
+                          <td className="p-3 text-xs text-slate-400 font-mono">{m.productCode || '-'}</td>
+                          <td className="p-3 font-bold text-slate-100">{m.productName}</td>
+                          <td className="p-3 text-xs text-slate-300">{m.sector}</td>
+                          <td className="p-3 text-center font-black text-amber-400">-{m.qty}</td>
+                          <td className="p-3 text-xs text-slate-400">{m.note}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -999,30 +908,27 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 5: RESUMO E RELATÓRIOS (COM FILTRO POR SETOR, MÊS, PERÍODO DE ATÉ 1 ANO E ALERTA DE ESTOQUE MÍNIMO) */}
+        {/* ABA 5: RESUMO E RELATÓRIOS (COM FILTROS DE SETOR, MÊS, PERÍODO ATÉ 1 ANO E ESTOQUE MÍNIMO) */}
         {activeTab === 'resumo' && (
           <div className="space-y-6">
-            {/* Secção de Controlo de Filtros de Resumo */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#C5A880]/20 flex flex-wrap gap-4 items-center justify-between">
+            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 flex flex-wrap gap-5 items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-[#2D1B12]">Filtros do Relatório e Resumo</h3>
-                <p className="text-xs text-gray-500">Separe por setor, mês ou selecione o período desejado (até 1 ano).</p>
+                <h3 className="text-lg font-bold text-white">Filtros de Relatórios e Auditoria</h3>
+                <p className="text-xs text-slate-400">Analise por setor, mês específico ou janela de até 1 ano.</p>
               </div>
 
               <div className="flex flex-wrap gap-3 items-center">
-                {/* Filtro por Setor */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-gray-600 mb-1">Setor</label>
-                  <select value={summarySector} onChange={(e) => setSummarySector(e.target.value)} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-xs font-bold">
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Setor</label>
+                  <select value={summarySector} onChange={(e) => setSummarySector(e.target.value)} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                     <option value="Todos">Todos os Setores</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
 
-                {/* Filtro por Período em Meses (Até 1 Ano) */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-gray-600 mb-1">Período Recente</label>
-                  <select value={summaryPeriodMonths} onChange={(e) => { setSummaryPeriodMonths(e.target.value); setSummaryMonth('Todos'); }} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-xs font-bold">
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Período Recente</label>
+                  <select value={summaryPeriodMonths} onChange={(e) => { setSummaryPeriodMonths(e.target.value); setSummaryMonth('Todos'); }} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                     <option value="1">Último Mês (30 dias)</option>
                     <option value="3">Últimos 3 Meses</option>
                     <option value="6">Últimos 6 Meses</option>
@@ -1030,11 +936,10 @@ export default function App() {
                   </select>
                 </div>
 
-                {/* Filtro por Mês Específico */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-gray-600 mb-1">Mês Específico</label>
-                  <select value={summaryMonth} onChange={(e) => setSummaryMonth(e.target.value)} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-xs font-bold">
-                    <option value="Todos">Todos os meses do período</option>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Mês Específico</label>
+                  <select value={summaryMonth} onChange={(e) => setSummaryMonth(e.target.value)} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
+                    <option value="Todos">Todos os meses</option>
                     {availableMonths.map(m => (
                       <option key={m} value={m}>{m.split('-').reverse().join('/')}</option>
                     ))}
@@ -1043,25 +948,25 @@ export default function App() {
               </div>
             </div>
 
-            {/* ALERTA DE PRODUTOS EM ESTOQUE MÍNIMO */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-red-200 space-y-4">
-              <div className="flex justify-between items-center border-b pb-3">
+            {/* ALERTA ESTOQUE MÍNIMO */}
+            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-rose-500/30 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                 <div>
-                  <h3 className="text-lg font-bold text-red-700 flex items-center gap-2">
+                  <h3 className="text-lg font-black text-rose-400 flex items-center gap-2.5">
                     <span>⚠️ Produtos em Estoque Mínimo ou Abaixo:</span>
-                    <span className="bg-red-100 text-red-800 px-3 py-0.5 rounded-full text-sm font-extrabold">{lowStockProducts.length} itens</span>
+                    <span className="bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-0.5 rounded-full text-xs font-black">{lowStockProducts.length} itens</span>
                   </h3>
-                  <p className="text-xs text-gray-500">Estes itens atingiram o limite de segurança e precisam de reposição imediata.</p>
+                  <p className="text-xs text-slate-400">Itens que atingiram o limiar de segurança e necessitam de pedido imediato.</p>
                 </div>
               </div>
 
               {lowStockProducts.length === 0 ? (
-                <p className="text-sm text-green-700 font-semibold py-4 text-center bg-green-50 rounded-xl">Parabéns! Nenhum produto abaixo do estoque mínimo no filtro atual.</p>
+                <p className="text-sm text-emerald-400 font-bold py-6 text-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl">Nenhum produto abaixo do estoque mínimo no filtro atual.</p>
               ) : (
-                <div className="overflow-x-auto max-h-72 overflow-y-auto border rounded-xl">
+                <div className="overflow-x-auto max-h-72 overflow-y-auto border border-slate-800 rounded-xl bg-slate-900/40">
                   <table className="w-full text-left text-sm">
                     <thead>
-                      <tr className="bg-gray-100 text-gray-700 text-xs uppercase font-bold sticky top-0">
+                      <tr className="bg-slate-900 text-slate-400 text-xs uppercase font-extrabold sticky top-0">
                         <th className="p-3">Código</th>
                         <th className="p-3">Produto</th>
                         <th className="p-3">Setor</th>
@@ -1070,17 +975,15 @@ export default function App() {
                         <th className="p-3 text-right">Ação</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-slate-800">
                       {lowStockProducts.map(p => (
-                        <tr key={p.id} className="hover:bg-red-50/40">
-                          <td className="p-3 text-xs font-bold text-gray-500">{p.code || '-'}</td>
-                          <td className="p-3 font-semibold text-[#2D1B12]">{p.name}</td>
-                          <td className="p-3 text-xs font-bold">{p.sector}</td>
-                          <td className="p-3 text-center font-extrabold text-red-600">{p.stock}</td>
-                          <td className="p-3 text-center font-bold text-gray-600">{p.minStock}</td>
-                          <td className="p-3 text-right">
-                            <button onClick={() => sendProductToPurchases(p)} className="px-3 py-1 bg-amber-100 text-amber-900 rounded-lg text-xs font-bold hover:bg-amber-200">Adicionar à Compra</button>
-                          </td>
+                        <tr key={p.id} className="hover:bg-rose-500/5">
+                          <td className="p-3 text-xs font-mono font-bold text-slate-400">{p.code || '-'}</td>
+                          <td className="p-3 font-bold text-slate-100">{p.name}</td>
+                          <td className="p-3 text-xs font-bold text-slate-300">{p.sector}</td>
+                          <td className="p-3 text-center font-black text-rose-400">{p.stock}</td>
+                          <td className="p-3 text-center font-bold text-slate-400">{p.minStock}</td>
+                          <td className="p-3 text-right"><button onClick={() => sendProductToPurchases(p)} className="px-3 py-1 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold hover:bg-amber-400 shadow">Comprar</button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1089,34 +992,34 @@ export default function App() {
               )}
             </div>
 
-            {/* RESUMO DE ENTRADAS E SAÍDAS NO PERÍODO SELECIONADO */}
+            {/* TOTAIS ENTRADAS E SAÍDAS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-3">
-                <h4 className="font-bold text-[#2D1B12] border-b pb-2 flex justify-between">
+              <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
+                <h4 className="font-extrabold text-white border-b border-slate-800 pb-2 flex justify-between">
                   <span>Total de Entradas</span>
-                  <span className="text-green-700">{filteredMovementsForSummary.filter(m => m.type === 'Entrada').reduce((acc, m) => acc + m.qty, 0)} un.</span>
+                  <span className="text-emerald-400 font-black">{filteredMovementsForSummary.filter(m => m.type === 'Entrada').reduce((acc, m) => acc + m.qty, 0)} un.</span>
                 </h4>
-                <p className="text-xs text-gray-500">Lançamentos de compras e reposições no período.</p>
+                <p className="text-xs text-slate-400">Volume reposto no período selecionado.</p>
               </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-3">
-                <h4 className="font-bold text-[#2D1B12] border-b pb-2 flex justify-between">
+              <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
+                <h4 className="font-extrabold text-white border-b border-slate-800 pb-2 flex justify-between">
                   <span>Total de Saídas / EPIs</span>
-                  <span className="text-orange-700">{filteredMovementsForSummary.filter(m => m.type === 'Saída').reduce((acc, m) => acc + m.qty, 0)} un.</span>
+                  <span className="text-amber-400 font-black">{filteredMovementsForSummary.filter(m => m.type === 'Saída').reduce((acc, m) => acc + m.qty, 0)} un.</span>
                 </h4>
-                <p className="text-xs text-gray-500">Retiradas e consumo pela equipa no período.</p>
+                <p className="text-xs text-slate-400">Volume consumido ou retirado pela equipa no período.</p>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800">
               <div>
-                <h2 className="text-xl font-bold text-[#2D1B12]">Exportação de Relatórios</h2>
-                <p className="text-xs text-gray-500">Exporte os dados filtrados para Excel ou PDF.</p>
+                <h2 className="text-lg font-bold text-white">Exportação Executiva</h2>
+                <p className="text-xs text-slate-400">Gere relatórios oficiais em Excel ou PDF para auditoria.</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={exportCSV} className="bg-[#C5A880] text-[#2D1B12] px-4 py-2.5 rounded-xl font-bold hover:bg-[#B3976F] transition shadow text-sm">
-                  Baixar Planilha Excel (.CSV)
+                <button onClick={exportCSV} className="bg-amber-500 text-slate-950 px-5 py-3 rounded-xl font-bold hover:bg-amber-400 transition shadow-lg shadow-amber-500/10 text-sm">
+                  Baixar Excel (.CSV)
                 </button>
-                <button onClick={() => window.print()} className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow text-sm">
+                <button onClick={() => window.print()} className="bg-slate-800 text-white border border-slate-700 px-5 py-3 rounded-xl font-semibold hover:bg-slate-700 transition shadow text-sm">
                   Imprimir / Salvar PDF
                 </button>
               </div>
@@ -1125,80 +1028,80 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL CADASTRAR / EDITAR PRODUTO */}
+      {/* MODAL PRODUTO */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="text-lg font-bold text-[#2D1B12]">{editingProduct ? 'Editar Produto' : 'Cadastrar Novo Produto'}</h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-700 font-bold">X</button>
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white">{editingProduct ? 'Editar Produto' : 'Cadastrar Novo Produto'}</h3>
+              <button onClick={closeModal} className="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <form onSubmit={handleSaveProduct} className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Código</label>
-                  <input type="text" value={formCode} onChange={(e) => setFormCode(e.target.value)} placeholder="Ex: 56" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Cód.</label>
+                  <input type="text" value={formCode} onChange={(e) => setFormCode(e.target.value)} placeholder="Ex: 56" className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Setor</label>
-                  <select value={formSector} onChange={(e) => setFormSector(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold">
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Setor</label>
+                  <select value={formSector} onChange={(e) => setFormSector(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-white">
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição do Produto</label>
-                <input type="text" required value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="Ex: ADESIVO INST 100 G" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Descrição</label>
+                <input type="text" required value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="Nome do produto..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Unidade</label>
-                  <input type="text" value={formUnit} onChange={(e) => setFormUnit(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Unid.</label>
+                  <input type="text" value={formUnit} onChange={(e) => setFormUnit(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Est. Atual</label>
-                  <input type="number" step="any" required value={formInitialStock} onChange={(e) => setFormInitialStock(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Est. Atual</label>
+                  <input type="number" step="any" required value={formInitialStock} onChange={(e) => setFormInitialStock(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Est. Mínimo</label>
-                  <input type="number" required value={formMinStock} onChange={(e) => setFormMinStock(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Est. Mín.</label>
+                  <input type="number" required value={formMinStock} onChange={(e) => setFormMinStock(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-3 border-t">
-                <button type="button" onClick={closeModal} className="px-4 py-2 rounded-xl border text-sm font-semibold">Cancelar</button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-[#2D1B12] text-[#FDFBF7] text-sm font-semibold shadow">Salvar</button>
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onClick={closeModal} className="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-sm font-bold shadow-lg shadow-amber-500/20 hover:bg-amber-400">Salvar</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* MODAL LANÇAR MOVIMENTAÇÃO */}
+      {/* MODAL MOVIMENTAÇÃO */}
       {isMoveModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="text-lg font-bold text-[#2D1B12]">Lançar Entrada ou Saída de Estoque</h3>
-              <button onClick={() => setIsMoveModalOpen(false)} className="text-gray-400 hover:text-gray-700 font-bold">X</button>
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white">Lançar Entrada ou Saída</h3>
+              <button onClick={() => setIsMoveModalOpen(false)} className="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <form onSubmit={handleSaveMovement} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">1. Filtrar Setor</label>
-                  <select value={moveSectorFilter} onChange={(e) => { setMoveSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setMoveProductId(first.id); }} className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-bold">
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Setor</label>
+                  <select value={moveSectorFilter} onChange={(e) => { setMoveSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setMoveProductId(first.id); }} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white">
                     <option value="Todos">Todos os Setores</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">2. Buscar Código ou Nome</label>
-                  <input type="text" value={moveSearchQuery} onChange={(e) => { setMoveSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (moveSectorFilter === 'Todos' || p.sector === moveSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setMoveProductId(first.id); }} placeholder="Digite cód ou nome..." className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-semibold" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Buscar Cód ou Nome</label>
+                  <input type="text" value={moveSearchQuery} onChange={(e) => { setMoveSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (moveSectorFilter === 'Todos' || p.sector === moveSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setMoveProductId(first.id); }} placeholder="Digite..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">3. Produto Selecionado ({moveFilteredProducts.length} encontrados)</label>
-                <select value={moveProductId} onChange={(e) => setMoveProductId(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold">
+                <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Produto ({moveFilteredProducts.length} encontrados)</label>
+                <select value={moveProductId} onChange={(e) => setMoveProductId(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-white">
                   {moveFilteredProducts.map(p => (
                     <option key={p.id} value={p.id}>[{p.code}] {p.name} ({p.sector}) — Saldo: {p.stock}</option>
                   ))}
@@ -1207,88 +1110,88 @@ export default function App() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo</label>
-                  <select value={moveType} onChange={(e) => setMoveType(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold">
-                    <option value="Entrada">Entrada (Compra / Retorno)</option>
-                    <option value="Saída">Saída (Uso / Retirada EPI)</option>
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Tipo</label>
+                  <select value={moveType} onChange={(e) => setMoveType(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white">
+                    <option value="Entrada">Entrada (Compra)</option>
+                    <option value="Saída">Saída / EPI</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Quantidade</label>
-                  <input type="number" step="any" min="0.01" required value={moveQty} onChange={(e) => setMoveQty(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Qtd</label>
+                  <input type="number" step="any" min="0.01" required value={moveQty} onChange={(e) => setMoveQty(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white" />
                 </div>
               </div>
 
               {moveType === 'Saída' && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Funcionário que Retirou</label>
-                  <select value={moveEmployee} onChange={(e) => setMoveEmployee(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold">
-                    <option value="-">Sem funcionário específico</option>
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Funcionário</label>
+                  <select value={moveEmployee} onChange={(e) => setMoveEmployee(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-white">
+                    <option value="-">Nenhum</option>
                     {employees.map(emp => <option key={emp.id} value={emp.name}>{emp.name}</option>)}
                   </select>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Observação</label>
-                <input type="text" value={moveNote} onChange={(e) => setMoveNote(e.target.value)} placeholder="Motivo ou observação..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Observação</label>
+                <input type="text" value={moveNote} onChange={(e) => setMoveNote(e.target.value)} placeholder="Nota ou motivo..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t">
-                <button type="button" onClick={() => setIsMoveModalOpen(false)} className="px-4 py-2 rounded-xl border text-sm font-semibold">Cancelar</button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-[#2D1B12] text-[#FDFBF7] text-sm font-semibold shadow">Confirmar Lançamento</button>
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onClick={() => setIsMoveModalOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-sm font-bold shadow-lg shadow-amber-500/20">Confirmar</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* MODAL NOVO PEDIDO DE COMPRA */}
+      {/* MODAL COMPRA */}
       {isPurchaseModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="text-lg font-bold text-[#2D1B12]">Novo Pedido de Compra</h3>
-              <button onClick={() => setIsPurchaseModalOpen(false)} className="text-gray-400 hover:text-gray-700 font-bold">X</button>
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white">Novo Pedido de Compra</h3>
+              <button onClick={() => setIsPurchaseModalOpen(false)} className="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <form onSubmit={handleCreatePurchaseOrder} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Filtrar Setor</label>
-                  <select value={purchSectorFilter} onChange={(e) => { setPurchSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setPurchProductId(first.id); }} className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-bold">
-                    <option value="Todos">Todos os Setores</option>
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Setor</label>
+                  <select value={purchSectorFilter} onChange={(e) => { setPurchSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setPurchProductId(first.id); }} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white">
+                    <option value="Todos">Todos</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Buscar por Código ou Nome</label>
-                  <input type="text" value={purchSearchQuery} onChange={(e) => { setPurchSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (purchSectorFilter === 'Todos' || p.sector === purchSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setPurchProductId(first.id); }} placeholder="Digite código ou nome..." className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Buscar Cód ou Nome</label>
+                  <input type="text" value={purchSearchQuery} onChange={(e) => { setPurchSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (purchSectorFilter === 'Todos' || p.sector === purchSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setPurchProductId(first.id); }} placeholder="Digite..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Produto a Comprar</label>
-                <select value={purchProductId} onChange={(e) => setPurchProductId(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold">
+                <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Produto</label>
+                <select value={purchProductId} onChange={(e) => setPurchProductId(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-white">
                   {purchFilteredProducts.map(p => (
-                    <option key={p.id} value={p.id}>[{p.code}] {p.name} ({p.sector}) — Est. Atual: {p.stock}</option>
+                    <option key={p.id} value={p.id}>[{p.code}] {p.name} ({p.sector})</option>
                   ))}
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Quantidade a Comprar</label>
-                  <input type="number" min="1" required value={purchQtyToBuy} onChange={(e) => setPurchQtyToBuy(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Qtd a Comprar</label>
+                  <input type="number" min="1" required value={purchQtyToBuy} onChange={(e) => setPurchQtyToBuy(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Fornecedor (Opcional)</label>
-                  <input type="text" value={purchSupplier} onChange={(e) => setPurchSupplier(e.target.value)} placeholder="Fornecedor..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Fornecedor</label>
+                  <input type="text" value={purchSupplier} onChange={(e) => setPurchSupplier(e.target.value)} placeholder="Nome..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t">
-                <button type="button" onClick={() => setIsPurchaseModalOpen(false)} className="px-4 py-2 rounded-xl border text-sm font-semibold">Cancelar</button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-[#2D1B12] text-[#FDFBF7] text-sm font-semibold shadow">Registar Pedido</button>
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onClick={() => setIsPurchaseModalOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-sm font-bold shadow-lg shadow-amber-500/20">Registar Pedido</button>
               </div>
             </form>
           </div>
