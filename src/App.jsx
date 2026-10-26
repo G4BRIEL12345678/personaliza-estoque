@@ -203,12 +203,12 @@ export default function App() {
       if (snapshot.empty || !hasNewList) {
         const batch = writeBatch(db);
         snapshot.docs.forEach(d => {
-          if (d.id.startsWith('emp_init_') || d.id.startsWith('emp_real_') || d.id.startsWith('emp_img_')) {
+          if (d.id.startsWith('emp_init_') || d.id.startsWith('emp_real_') || d.id.startsWith('emp_img_') || d.id.startsWith('emp_fixed_')) {
             batch.delete(d.ref);
           }
         });
         INITIAL_EMPLOYEES.forEach((empName, idx) => {
-          const eId = 'emp_fixed_' + idx;
+          const eId = 'emp_v2_' + idx;
           batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', eId), {
             name: empName,
             createdAt: new Date().toISOString()
@@ -385,11 +385,10 @@ export default function App() {
       purchaseDate: null,
       qtyBought: 0,
       status: 'AGUARDANDO',
-      note: purchNote.trim() || '-'
+      note: 'Pedido criado'
     });
     setIsPurchaseModalOpen(false);
     setPurchSupplier('');
-    setPurchNote('');
     setPurchSearchQuery('');
   };
 
@@ -560,9 +559,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
-      {/* HEADER PROFISSIONAL EXECUTIVO (ESTICADO DE PONTA A PONTA) */}
-      <header className="bg-slate-950 border-b border-slate-800 shadow-2xl px-4 md:px-10 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-40 backdrop-blur-md bg-slate-950/90 w-full">
+    <div className="w-full min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col antialiased m-0 p-0 selection:bg-amber-500 selection:text-slate-950">
+      {/* HEADER EXECUTIVO DE PONTA A PONTA (SEM BORDAS LATERAIS BRANCAS) */}
+      <header className="w-full bg-slate-950 border-b border-slate-800 shadow-2xl px-4 md:px-8 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-40 backdrop-blur-md bg-slate-950/95">
         <div className="flex items-center gap-4">
           {/* Logo Marrom com Escrita Branca */}
           <div className="w-12 h-12 rounded-2xl bg-[#3D261A] border border-[#5A3A29] flex items-center justify-center font-black text-white text-2xl shadow-xl">
@@ -595,8 +594,8 @@ export default function App() {
         </nav>
       </header>
 
-      {/* CORPO PRINCIPAL ESTICADO DE PONTA A PONTA (W-FULL PX-4 MD:PX-8) */}
-      <main className="flex-1 w-full px-4 md:px-8 py-6">
+      {/* CONTEÚDO PRINCIPAL 100% ESTICADO DE PONTA A PONTA */}
+      <main className="w-full flex-1 px-4 md:px-8 py-6 space-y-6">
         {/* ABA 1: ESTOQUE */}
         {activeTab === 'estoque' && (
           <div className="space-y-6 w-full">
@@ -1157,42 +1156,3 @@ export default function App() {
                   <select value={purchSectorFilter} onChange={(e) => { setPurchSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setPurchProductId(first.id); }} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white">
                     <option value="Todos">Todos</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Buscar Cód ou Nome</label>
-                  <input type="text" value={purchSearchQuery} onChange={(e) => { setPurchSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (purchSectorFilter === 'Todos' || p.sector === purchSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setPurchProductId(first.id); }} placeholder="Digite..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Produto</label>
-                <select value={purchProductId} onChange={(e) => setPurchProductId(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-white">
-                  {purchFilteredProducts.map(p => (
-                    <option key={p.id} value={p.id}>[{p.code}] {p.name} ({p.sector})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Qtd a Comprar</label>
-                  <input type="number" min="1" required value={purchQtyToBuy} onChange={(e) => setPurchQtyToBuy(e.target.value)} className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm font-bold text-white" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-slate-400 mb-1">Fornecedor</label>
-                  <input type="text" value={purchSupplier} onChange={(e) => setPurchSupplier(e.target.value)} placeholder="Nome..." className="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white" />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                <button type="button" onClick={() => setIsPurchaseModalOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300">Cancelar</button>
-                <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-sm font-bold shadow-lg shadow-amber-500/20">Registar Pedido</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
