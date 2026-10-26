@@ -19,12 +19,46 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = "personaliza-estoque-v4";
 
+// Lista oficial de 38 funcionários enviada na imagem
 const INITIAL_EMPLOYEES = [
-  "Adilson", "Adriano", "Alan", "Alexandre", "Aline", "Amanda", "Ana", "Anderson", 
-  "Antônio", "Beatriz", "Bruno", "Carlos", "Caroline", "César", "Daniel", "Danielle", 
-  "Diego", "Eduardo", "Eliane", "Felipe", "Fernanda", "Flávia", "Gabriel", "Gabriela", 
-  "Gustavo", "Igor", "Isabela", "João", "Jéssica", "Larissa", "Lucas", "Mariana", 
-  "Matheus", "Natália", "Paulo", "Pedro", "Rafael", "Vinícius"
+  "ADRIANO SANTIAGO MENDONCA",
+  "ALINE",
+  "ALINE DO VALE SOARES",
+  "ANTONIO JOSE DA SILVA",
+  "ARTHUR GOUVEA",
+  "CARLOS ANTONIO DE ALMEIDA SILVA",
+  "CARLOS EDUARDO",
+  "CHAENE ARAUJO",
+  "CLAUDINEI SILVA NASCIMENTO",
+  "CRISTOVAO VITORINO",
+  "EDVALDO GONCALVES DE SOUZA",
+  "GABRIEL NOGUEIRA DOS SANTOS",
+  "GABRIELLE CRISTINE MARCELINO DE SOUZA",
+  "GLAUCIA FERNANDA DE FREITAS MAGALHAES",
+  "HIGOR LIMA COLOMBO",
+  "IGO FRANCISCO",
+  "IGOR DA SILVA COSTA",
+  "IGOR REIS",
+  "JOSE MARIA DE SOUZA",
+  "JUAREZ DA SILVA REIS",
+  "JOAO ENES",
+  "LAZARO",
+  "LEONARDO FARIAS EMILIANO",
+  "MARIA LUIZA DE OLIVEIRA",
+  "MATEUS HENRIQUE",
+  "MAURO LUCIO SALES REIFF",
+  "MICKAEL",
+  "NEY ANGELO DA SILVA NASCIMENTO",
+  "NICOLAS COSTA",
+  "NINA",
+  "PEDRO HENRIQUE DOS PASSOS SILVA",
+  "PEDRO HENRIQUE SIMOES",
+  "PETERSON SILVA NASCIMENTO",
+  "RAUL LUIZ VIEIRA",
+  "ROBERTO CARLOS DE AZEVEDO",
+  "RONALDO DA SILVA SANTOS",
+  "SEBASTIAO CARLOS FELICIANO DE MELO",
+  "WALLACE WANDER"
 ];
 
 const SECTORS = ["SUBLIMAÇÃO", "MARCENARIA", "VIDRAÇARIA", "EPI"];
@@ -195,12 +229,21 @@ export default function App() {
       }
     }).catch(err => console.error("Erro seed produtos:", err));
 
-    // Popular funcionários iniciais se estiver vazio
+    // Sincronizar a nova lista oficial de 38 funcionários (substituindo os antigos genéricos se existirem)
     getDocs(empRef).then(async (snapshot) => {
-      if (snapshot.empty) {
+      const existingNames = snapshot.docs.map(d => d.data().name);
+      const hasNewList = existingNames.includes("ADRIANO SANTIAGO MENDONCA");
+      if (snapshot.empty || !hasNewList) {
         const batch = writeBatch(db);
+        // Remove apenas os registos antigos de inicialização (`emp_init_...`) para limpar os nomes antigos
+        snapshot.docs.forEach(d => {
+          if (d.id.startsWith('emp_init_')) {
+            batch.delete(d.ref);
+          }
+        });
+        // Insere os 38 funcionários reais da imagem
         INITIAL_EMPLOYEES.forEach((empName, idx) => {
-          const eId = 'emp_init_' + idx;
+          const eId = 'emp_real_' + idx;
           batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', eId), {
             name: empName,
             createdAt: new Date().toISOString()
@@ -412,7 +455,6 @@ export default function App() {
     setPurchSearchQuery('');
   };
 
-  // Permite alterar Qtd a Comprar ou Fornecedor direto na tabela, mesmo depois de lançado o pedido
   const handleUpdatePurchaseField = async (purch, field, value) => {
     try {
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
@@ -424,7 +466,6 @@ export default function App() {
     }
   };
 
-  // Permite corrigir/alterar a quantidade comprada mesmo após já ter sido confirmada, ajustando o estoque automaticamente
   const handleEditBoughtQuantity = async (purch) => {
     const inputQty = prompt(
       `Alterar quantidade comprada de "${purch.productName}".\n(O saldo do estoque será ajustado automaticamente com a diferença):`,
@@ -445,13 +486,11 @@ export default function App() {
     const batch = writeBatch(db);
     const nowIso = new Date().toISOString();
 
-    // 1. Atualiza a nova quantidade no pedido de compra
     batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
       qtyBought: newQtyBought,
       updatedAt: nowIso
     });
 
-    // 2. Ajusta o estoque do produto com a diferença
     if (product) {
       batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), {
         stock: Math.max(0, (Number(product.stock) || 0) + diff),
@@ -459,7 +498,6 @@ export default function App() {
       });
     }
 
-    // 3. Atualiza a movimentação correspondente (se existir)
     if (purch.movementId) {
       const movExists = movements.some(m => m.id === purch.movementId);
       if (movExists) {
@@ -487,7 +525,6 @@ export default function App() {
     const nowIso = new Date().toISOString();
     const movId = 'mov_purch_' + Date.now();
 
-    // 1. Atualiza o pedido na aba Compras para COMPRADO
     batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
       status: 'COMPRADO',
       qtyBought: qtyBought,
@@ -495,7 +532,6 @@ export default function App() {
       movementId: movId
     });
 
-    // 2. Soma automaticamente no estoque do produto
     if (product) {
       batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), {
         stock: (Number(product.stock) || 0) + qtyBought,
@@ -503,7 +539,6 @@ export default function App() {
       });
     }
 
-    // 3. Lança entrada automática na Movimentação
     batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'movements', movId), {
       productId: purch.productId,
       productCode: purch.productCode || '-',
@@ -549,13 +584,13 @@ export default function App() {
     alert(`"${prod.name}" (${finalQty} un.) foi adicionado à aba COMPRAS!`);
   };
 
-  // --- FUNÇÕES DE FUNCIONÁRIOS ---
+  // --- FUNÇÕES DE FUNCIONÁRIOS (ADICIONAR E EXCLUIR) ---
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     if (!newEmployeeName.trim()) return;
     const eId = 'emp_' + Date.now();
     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', eId), {
-      name: newEmployeeName.trim(),
+      name: newEmployeeName.trim().toUpperCase(),
       createdAt: new Date().toISOString()
     });
     setNewEmployeeName('');
@@ -564,6 +599,7 @@ export default function App() {
   const handleDeleteEmployee = async (emp) => {
     if (confirm(`Deseja excluir o funcionário "${emp.name}" da lista?`)) {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', emp.id));
+      if (selectedEmpForHistory === emp.name) setSelectedEmpForHistory('Todos');
     }
   };
 
@@ -593,7 +629,6 @@ export default function App() {
     link.click();
   };
 
-  // Filtros da Tabela Principal de Estoque (Por Nome, Código e Setor)
   const filteredProducts = products.filter(p => {
     const q = searchTerm.toLowerCase().trim();
     const matchNameOrCode = !q || p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase().includes(q);
@@ -609,7 +644,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#2D1B12] text-[#FDFBF7] flex flex-col items-center justify-center font-sans">
         <div className="w-12 h-12 border-4 border-[#C5A880] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-xl tracking-wide font-medium text-[#C5A880]">Personaliza - Sincronizando 320 Produtos e Setores...</p>
+        <p className="text-xl tracking-wide font-medium text-[#C5A880]">Personaliza - Sincronizando Produtos e Funcionários...</p>
       </div>
     );
   }
@@ -971,34 +1006,34 @@ export default function App() {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-5">
               <div>
                 <h2 className="text-lg font-bold text-[#2D1B12]">Equipa de Funcionários ({employees.length})</h2>
-                <p className="text-xs text-gray-500">Adicione ou remova colaboradores para o registo de EPIs e retiradas.</p>
+                <p className="text-xs text-gray-500">Adicione novos funcionários ou exclua colaboradores existentes abaixo.</p>
               </div>
 
               <form onSubmit={handleAddEmployee} className="flex gap-2">
                 <input 
                   type="text" 
-                  placeholder="Nome do novo funcionário..." 
+                  placeholder="Nome completo do funcionário..." 
                   value={newEmployeeName}
                   onChange={(e) => setNewEmployeeName(e.target.value)}
                   className="flex-1 px-3 py-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm focus:outline-none"
                 />
-                <button type="submit" className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#3D261A]">
+                <button type="submit" className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#3D261A] whitespace-nowrap">
                   + Adicionar
                 </button>
               </form>
 
-              <div className="max-h-96 overflow-y-auto divide-y divide-gray-100 border rounded-xl">
+              <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100 border rounded-xl">
                 {employees.map(emp => (
-                  <div key={emp.id} className="p-3 flex justify-between items-center hover:bg-gray-50">
+                  <div key={emp.id} className="p-3 flex justify-between items-center hover:bg-gray-50 gap-2">
                     <button 
                       onClick={() => setSelectedEmpForHistory(emp.name)}
-                      className={`text-sm font-semibold text-left flex-1 ${selectedEmpForHistory === emp.name ? 'text-[#C5A880] font-bold underline' : 'text-[#2D1B12]'}`}
+                      className={`text-xs font-bold text-left flex-1 ${selectedEmpForHistory === emp.name ? 'text-[#C5A880] underline' : 'text-[#2D1B12]'}`}
                     >
                       {emp.name}
                     </button>
                     <button 
                       onClick={() => handleDeleteEmployee(emp)}
-                      className="text-xs text-red-600 hover:bg-red-50 px-2 py-1 rounded font-semibold"
+                      className="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg font-semibold"
                     >
                       Excluir
                     </button>
@@ -1011,12 +1046,12 @@ export default function App() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
                 <div>
                   <h3 className="text-lg font-bold text-[#2D1B12]">Histórico de Retiradas / EPIs por Funcionário</h3>
-                  <p className="text-xs text-gray-500">Selecione um funcionário ao lado ou no filtro para ver tudo o que ele retirou.</p>
+                  <p className="text-xs text-gray-500">Clique num funcionário na lista ao lado para filtrar as retiradas dele.</p>
                 </div>
                 <select 
                   value={selectedEmpForHistory}
                   onChange={(e) => setSelectedEmpForHistory(e.target.value)}
-                  className="p-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm font-bold"
+                  className="p-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-xs font-bold"
                 >
                   <option value="Todos">Todos os Funcionários</option>
                   {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
@@ -1042,7 +1077,7 @@ export default function App() {
                       .map(m => (
                         <tr key={m.id} className="hover:bg-gray-50">
                           <td className="p-3 text-xs text-gray-500">{new Date(m.date).toLocaleString('pt-BR')}</td>
-                          <td className="p-3 font-bold text-[#2D1B12]">{m.employee}</td>
+                          <td className="p-3 font-bold text-[#2D1B12] text-xs">{m.employee}</td>
                           <td className="p-3 text-xs text-gray-500">{m.productCode || '-'}</td>
                           <td className="p-3 font-semibold">{m.productName}</td>
                           <td className="p-3 text-xs">{m.sector}</td>
