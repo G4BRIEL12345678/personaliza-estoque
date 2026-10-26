@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const appId = "personaliza-estoque-v1";
+const appId = "personaliza-estoque-v2"; // Versão atualizada para forçar a carga completa
 
 const EMPLOYEES_LIST = [
   "Adilson", "Adriano", "Alan", "Alexandre", "Aline", "Amanda", "Ana", "Anderson", 
@@ -167,8 +167,44 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "87",
-    "name": "TECIDO SLUPPA",
+    "code": "55",
+    "name": "TECIDO PLANO OXFORD STRETCH SUPER",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "166",
+    "name": "TECIDO PLANO OXFORD STRETCH SUPER PRETO",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "49",
+    "name": "TINTA AMARELA 1 LITRO TS-100",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 4.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "8",
+    "name": "TINTA AMARELA 2 LITROS MIMAKI JV 150-160",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "253",
+    "name": "TINTA AMARELA GALÃO DE 10 KG",
     "sector": "SUBLIMAÇÃO",
     "unit": "UN",
     "stock": 0.0,
@@ -185,6 +221,33 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
+    "code": "72",
+    "name": "TINTA AZUL 2 LITROS MIMAK JV150-160",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "250",
+    "name": "TINTA AZUL GALÃO DE 10 KG",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "46",
+    "name": "TINTA BLACK PRETA 2L MIMAKI JV150-160",
+    "sector": "SUBLIMAÇÃO",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
     "code": "48",
     "name": "TINTA MAGENTA 1 L TS-100",
     "sector": "SUBLIMAÇÃO",
@@ -194,8 +257,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "49",
-    "name": "TINTA PRETO 1 LITRO TS-100",
+    "code": "9",
+    "name": "TINTA MAGENTA 2 LITROS MIMAK JV 150-160",
     "sector": "SUBLIMAÇÃO",
     "unit": "UN",
     "stock": 0.0,
@@ -203,8 +266,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "50",
-    "name": "TINTA YELLOW 1 LITRO TS-100",
+    "code": "252",
+    "name": "TINTA MAGENTA GALÃO DE 10 KG",
     "sector": "SUBLIMAÇÃO",
     "unit": "UN",
     "stock": 0.0,
@@ -212,80 +275,17 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "91",
-    "name": "TONER 135A PRETO",
+    "code": "52",
+    "name": "TINTA PRETA 1 LITRO TS-100",
     "sector": "SUBLIMAÇÃO",
     "unit": "UN",
-    "stock": 0.0,
+    "stock": 4.0,
     "minStock": 5,
     "classification": "Matéria Prima"
   },
   {
-    "code": "108",
-    "name": "VASO CILINDRICO G",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "109",
-    "name": "VASO CILINDRICO M",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "110",
-    "name": "VASO CILINDRICO P",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "111",
-    "name": "VASO CUBO G",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "112",
-    "name": "VASO CUBO M",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "113",
-    "name": "VASO CUBO P",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "114",
-    "name": "VASO LAGOON G",
-    "sector": "SUBLIMAÇÃO",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "115",
-    "name": "VASO LAGOON M",
+    "code": "251",
+    "name": "TINTA PRETA GALÃO DE 10 KG",
     "sector": "SUBLIMAÇÃO",
     "unit": "UN",
     "stock": 0.0,
@@ -329,188 +329,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "304",
-    "name": "APARADOR CANTO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "151",
-    "name": "CAIXA DE PAPELAO 100X35X10",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "152",
-    "name": "CAIXA DE PAPELAO 100X60X10",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "136",
-    "name": "CAIXA DE PAPELAO 112X55X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "153",
-    "name": "CAIXA DE PAPELAO 125X65X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "154",
-    "name": "CAIXA DE PAPELAO 140X55X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "155",
-    "name": "CAIXA DE PAPELAO 150X70X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "156",
-    "name": "CAIXA DE PAPELAO 165X75X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "157",
-    "name": "CAIXA DE PAPELAO 180X80X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "137",
-    "name": "CAIXA DE PAPELAO 75X45X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "138",
-    "name": "CAIXA DE PAPELAO 90X50X15",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "139",
-    "name": "CANTONEIRA DE PAPELÃO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "140",
-    "name": "CHAPA DE MDF 15 MM BRANCO TX 2 FACES",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "161",
-    "name": "CHAPA DE MDF 15MM AMENDOA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "162",
-    "name": "CHAPA DE MDF 15MM CEREJEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "163",
-    "name": "CHAPA DE MDF 15MM CINZA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "164",
-    "name": "CHAPA DE MDF 15MM IMBUIA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "165",
-    "name": "CHAPA DE MDF 15MM NOGUEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "166",
-    "name": "CHAPA DE MDF 15MM PRETO TX",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "167",
-    "name": "CHAPA DE MDF 15MM RUSTIC",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
     "code": "168",
-    "name": "CHAPA DE MDF 15MM TCO",
+    "name": "ÁGUA RAZ EUCATEX 5LTS 1 GL",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -518,8 +338,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "169",
-    "name": "CHAPA DE MDF 18MM AMENDOA",
+    "code": "88",
+    "name": "AGUARRAS 1 LITRO EUCATEX",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -527,8 +347,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "170",
-    "name": "CHAPA DE MDF 18MM BRANCO TX 2 FACES",
+    "code": "142",
+    "name": "AGUARRAS EUCATEX 18 LITROS",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -536,8 +356,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "171",
-    "name": "CHAPA DE MDF 18MM CEREJEIRA",
+    "code": "118",
+    "name": "ARRUELA GRANDA",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -545,8 +365,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "172",
-    "name": "CHAPA DE MDF 18MM CINZA",
+    "code": "117",
+    "name": "ARRUELA PEQUENA",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -554,8 +374,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "173",
-    "name": "CHAPA DE MDF 18MM IMBUIA",
+    "code": "21",
+    "name": "BARRA CHATA....... 1 X 3 16",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -563,8 +383,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "174",
-    "name": "CHAPA DE MDF 18MM NOGUEIRA",
+    "code": "19",
+    "name": "BARRA CHATA..... 5 8 X 1 8",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -572,8 +392,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "175",
-    "name": "CHAPA DE MDF 18MM PRETO TX",
+    "code": "5",
+    "name": "BARRA CHATA. 3 8 X 1 8",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -581,8 +401,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "176",
-    "name": "CHAPA DE MDF 18MM RUSTIC",
+    "code": "15",
+    "name": "BARRA CHATA 1/4",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -590,8 +410,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "177",
-    "name": "CHAPA DE MDF 18MM TCO",
+    "code": "314",
+    "name": "BARRA CHATA 1 1/2X 3/16",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -599,8 +419,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "178",
-    "name": "CHAPA DE MDF 3MM AMENDOA",
+    "code": "313",
+    "name": "BARRA CHATA 1 1/2 X 3/6",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -608,8 +428,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "179",
-    "name": "CHAPA DE MDF 3MM BRANCO TX 2 FACES",
+    "code": "13",
+    "name": "BARRA CHATA 1 X1/8",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -617,683 +437,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "180",
-    "name": "CHAPA DE MDF 3MM CEREJEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "181",
-    "name": "CHAPA DE MDF 3MM CINZA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "182",
-    "name": "CHAPA DE MDF 3MM IMBUIA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "183",
-    "name": "CHAPA DE MDF 3MM NOGUEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "184",
-    "name": "CHAPA DE MDF 3MM PRETO TX",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "185",
-    "name": "CHAPA DE MDF 3MM RUSTIC",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "186",
-    "name": "CHAPA DE MDF 3MM TCO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "187",
-    "name": "CHAPA DE MDF 6MM AMENDOA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "188",
-    "name": "CHAPA DE MDF 6MM BRANCO TX 2 FACES",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "189",
-    "name": "CHAPA DE MDF 6MM CEREJEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "190",
-    "name": "CHAPA DE MDF 6MM CINZA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "191",
-    "name": "CHAPA DE MDF 6MM IMBUIA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "192",
-    "name": "CHAPA DE MDF 6MM NOGUEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "193",
-    "name": "CHAPA DE MDF 6MM PRETO TX",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "194",
-    "name": "CHAPA DE MDF 6MM RUSTIC",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "195",
-    "name": "CHAPA DE MDF 6MM TCO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "196",
-    "name": "CHAPA DE MDF 9MM AMENDOA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "197",
-    "name": "CHAPA DE MDF 9MM BRANCO TX 2 FACES",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "198",
-    "name": "CHAPA DE MDF 9MM CEREJEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "199",
-    "name": "CHAPA DE MDF 9MM CINZA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "200",
-    "name": "CHAPA DE MDF 9MM IMBUIA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "202",
-    "name": "CHAPA DE MDF 9MM NOGUEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "203",
-    "name": "CHAPA DE MDF 9MM PRETO TX",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "204",
-    "name": "CHAPA DE MDF 9MM RUSTIC",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "205",
-    "name": "CHAPA DE MDF 9MM TCO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "206",
-    "name": "COLA BICOMPONENTE EXTRA FORTE 1KG",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "207",
-    "name": "COLA BRANCA PVA EXTRA 1KG",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "208",
-    "name": "COLA DE CONTATO SOLVENTE 2,8L",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "209",
-    "name": "COLA HOT MELT PARA BORDA 1KG",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "210",
-    "name": "CORREDIÇA TELESCOPICA 30CM",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "211",
-    "name": "CORREDIÇA TELESCOPICA 35CM",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "212",
-    "name": "CORREDIÇA TELESCOPICA 40CM",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "213",
-    "name": "CORREDIÇA TELESCOPICA 45CM",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "214",
-    "name": "CORREDIÇA TELESCOPICA 50CM",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "215",
-    "name": "DOBRADIÇA CANECO 35MM 35 GRAUS",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "216",
-    "name": "DOBRADIÇA CANECO 35MM COM AMORTECEDOR",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "217",
-    "name": "DOBRADIÇA CANECO 35MM RETA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "218",
-    "name": "ENCOSTO ESTOFADO MODULAR",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "219",
-    "name": "ESTROBO FIXADOR DE PAREDE",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "220",
-    "name": "FECHADURA PARA GAVETA 20MM",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "221",
-    "name": "FITA DE BORDA PVC 19MM AMENDOA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "222",
-    "name": "FITA DE BORDA PVC 19MM BRANCA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "223",
-    "name": "FITA DE BORDA PVC 19MM CEREJEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "224",
-    "name": "FITA DE BORDA PVC 19MM CINZA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "225",
-    "name": "FITA DE BORDA PVC 19MM IMBUIA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "226",
-    "name": "FITA DE BORDA PVC 19MM NOGUEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "227",
-    "name": "FITA DE BORDA PVC 19MM PRETA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "228",
-    "name": "FITA DE BORDA PVC 19MM RUSTIC",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "229",
-    "name": "FITA DE BORDA PVC 19MM TCO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "230",
-    "name": "FITA DE BORDA PVC 35MM AMENDOA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "231",
-    "name": "FITA DE BORDA PVC 35MM BRANCA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "232",
-    "name": "FITA DE BORDA PVC 35MM CEREJEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "233",
-    "name": "FITA DE BORDA PVC 35MM CINZA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "234",
-    "name": "FITA DE BORDA PVC 35MM IMBUIA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "235",
-    "name": "FITA DE BORDA PVC 35MM NOGUEIRA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "236",
-    "name": "FITA DE BORDA PVC 35MM PRETA",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "237",
-    "name": "FITA DE BORDA PVC 35MM RUSTIC",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "238",
-    "name": "FITA DE BORDA PVC 35MM TCO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "239",
-    "name": "KIT INFRAESTRUTURA PARA PRATELEIRA INVISIVEL",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "240",
-    "name": "MASSA PARA CORRETIVA DE MDF 100G",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "241",
-    "name": "PARAFUSO CHIPBOARD 3.5X35",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "242",
-    "name": "PARAFUSO CHIPBOARD 4.0X40",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "243",
-    "name": "PARAFUSO CHIPBOARD 4.5X50",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "244",
-    "name": "PERFIL DE ALUMINIO PULL P/ PORTAS",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "245",
-    "name": "PUXADOR CONCHA PRETO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "246",
-    "name": "PUXADOR PONTO METALICO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "247",
-    "name": "SILICONE ACETICO INCOLOR 280G",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "248",
-    "name": "SUPORTE MAO FRANCESA 20X20",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "249",
-    "name": "SUPORTE MAO FRANCESA 30X30",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "250",
-    "name": "SUPORTE TOALHEIRO CROMADO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "251",
-    "name": "TAPETE DE SISAL SINTETICO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "252",
-    "name": "TUBO CABIDEIRO OVAL CROMADO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "253",
-    "name": "SUPORTE PARA TUBO CABIDEIRO",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "254",
-    "name": "GANCHO PORTA CHAVES",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "255",
-    "name": "CANTONEIRA METALICA 90 GRAUS",
-    "sector": "MARCENARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "256",
-    "name": "BUCHA S8 COM PARAFUSO",
+    "code": "298",
+    "name": "BARRA CHATA 2´ 3/16",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1302,7 +447,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "code": "257",
-    "name": "BUCHA S10 COM PARAFUSO",
+    "name": "BARRA CHATA 2 5/16 3M",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1310,8 +455,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "258",
-    "name": "RODIZIO DE GEL COM TRAVA 50MM",
+    "code": "297",
+    "name": "BARRA CHATA 3/4X1/8",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1319,8 +464,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "259",
-    "name": "RODIZIO DE GEL SEM TRAVA 50MM",
+    "code": "12",
+    "name": "BARRA CHATA 5/8X1/8",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1328,8 +473,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "260",
-    "name": "PASSA FIO PLASTICO PARA MESA",
+    "code": "16",
+    "name": "BARRA REDONDA",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1337,8 +482,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "261",
-    "name": "MINIFIX COMPLETO TAMANHO 15MM",
+    "code": "18",
+    "name": "BARRA REDONDA... 3 8 LISO",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1346,8 +491,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "262",
-    "name": "TAMBOR MINIFIX 15MM",
+    "code": "23",
+    "name": "BARRA REDONDA.. 1 4 LISO",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1355,8 +500,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "263",
-    "name": "HASTE PARA MINIFIX",
+    "code": "172",
+    "name": "BASE DE MESA CONE",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1364,8 +509,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "264",
-    "name": "CAVILHA DE MADEIRA 6X30",
+    "code": "185",
+    "name": "BASE DE MESA ESTRELA",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1373,8 +518,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "265",
-    "name": "CAVILHA DE MADEIRA 8X30",
+    "code": "74",
+    "name": "BETUME LIQUIDO 5 LITROS",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1382,8 +527,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "266",
-    "name": "TAPA FURO ADESIVO AMENDOA",
+    "code": "148",
+    "name": "BOBINA DE PAPELAO ONDULADO",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1391,8 +536,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "267",
-    "name": "TAPA FURO ADESIVO BRANCO",
+    "code": "318",
+    "name": "BRANCO FOSCO PU",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1400,8 +545,17 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "268",
-    "name": "TAPA FURO ADESIVO CEREJEIRA",
+    "code": "68",
+    "name": "BUCHA COMUM 6 CM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 37.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "171",
+    "name": "BUCHA W-MU PEAD C/ ANEL 6MM",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1409,8 +563,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "269",
-    "name": "TAPA FURO ADESIVO CINZA",
+    "code": "153",
+    "name": "CADEIRA ESTOFADA",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1418,8 +572,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "270",
-    "name": "TAPA FURO ADESIVO IMBUIA",
+    "code": "159",
+    "name": "CAIXA 01- 600X210X50",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1427,8 +581,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "271",
-    "name": "TAPA FURO ADESIVO NOGUEIRA",
+    "code": "187",
+    "name": "CAIXA 02 -500X350X180",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1436,8 +590,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "272",
-    "name": "TAPA FURO ADESIVO PRETO",
+    "code": "152",
+    "name": "CAIXA 03-800X210X60 PAPELÃO",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1445,8 +599,26 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "273",
-    "name": "TAPA FURO ADESIVO RUSTIC",
+    "code": "89",
+    "name": "CAIXA 05 CADEIRA FORDOS C/ 10 UNIDADES",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "284",
+    "name": "CAIXA 06- 1010X210X50 20 UNIDADES POR FARDO",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "285",
+    "name": "CAIXA 07- 1210X310X50 20 UNIDADES POR FARDO",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1455,7 +627,817 @@ const INITIAL_PRODUCTS = [
   },
   {
     "code": "274",
-    "name": "TAPA FURO ADESIVO TCO",
+    "name": "CAIXA 08- 2010X160X50",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "275",
+    "name": "CAIXA 09 - 2010X210X50",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "276",
+    "name": "CAIXA 10- 2010X260X50",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "286",
+    "name": "CAIXA 11- 2010X310X50",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "277",
+    "name": "CAIXA 12 - 2010X360X50",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "120",
+    "name": "CAIXA DE EMBALGEM PARA MESA PÉ DE CEBOLA MENOR",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "119",
+    "name": "CAIXA EMBALAGEM PARA MESA PÉ DE CEBOLA MAIOR",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "75",
+    "name": "CERA P MOVEIS 2,4 KGS INCOLOR",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "236",
+    "name": "CHAPA GALVANIZADA 28 2 X 1,20",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "32",
+    "name": "CHAPA MADEIRA BRANCA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "91",
+    "name": "COLA DE MADEIRA GALÃO DE 5 KGS",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "3",
+    "name": "ELETR ACO CARB 2,5MM E6013 5KG",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "41",
+    "name": "ELTRO ACO CRAB 2,5MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "232",
+    "name": "ESA 14 NEW - P - 0,41 X 0,41 X 0,03 M ACENTO",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "124",
+    "name": "ESPUMA D20 BRANCA L400 01 CM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "125",
+    "name": "ESPUMA D33 LARANJA L900 05 CM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "76",
+    "name": "EUCALUX PRETO FOSCO 3,6L",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "31",
+    "name": "EUCATEX 3MM 2,33X0,50",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "327",
+    "name": "EUCATEX BRANCO FOSCO",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "289",
+    "name": "EUCATEX QUEROSENE 1L",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "130",
+    "name": "FECHO ROLETE",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "58",
+    "name": "FITA ADESIVA AA40",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "99",
+    "name": "FITA DUPLA FACE GROSSA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "208",
+    "name": "GRAMPO ESTOFAMENTO 80.13 CX 15.750",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "209",
+    "name": "GRAMPO ESTRUTURAL 14.38",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "202",
+    "name": "GRAMPO ESTRUTUTAL 14/35 CX COM 14.400",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "126",
+    "name": "GRAMPO IMECO 1 4/45 CX CM 11,840",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "77",
+    "name": "LACXE RAZ AGUARRAZ 18 LITROS",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "127",
+    "name": "LINHO PARMA 25 CRU/CINZA NEBLIMA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "110",
+    "name": "LONA PRETA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "26",
+    "name": "MADEIRA 30X4CM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "147",
+    "name": "MADEIRA 35X2,5X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "204",
+    "name": "MADEIRA DE PINUS 35X2,5X3,00",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "301",
+    "name": "MADEIRA P/ LAREIRA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "203",
+    "name": "MADEIRA PINUS 12X5,5X3,00",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "36",
+    "name": "MADEIRA PINUS 15X2,5X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "40",
+    "name": "MADEIRA PINUS 15X4,0X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "35",
+    "name": "MADEIRA PINUS 20X2,5X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "39",
+    "name": "MADEIRA PINUS 20X4,0X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "205",
+    "name": "MADEIRA PINUS 20X5,5X3,00",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "38",
+    "name": "MADEIRA PINUS 25,40X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "34",
+    "name": "MADEIRA PINUS 25X2,5X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "33",
+    "name": "MADEIRA PINUS 30X2,5X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "37",
+    "name": "MADEIRA PINUS 30X4,0X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "179",
+    "name": "MADEIRA PINUS 35X4.0X3",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "260",
+    "name": "MADEIRA PINUS 6,5 X 6,5 X 3,00",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "123",
+    "name": "MALHA DE EMBALAGEM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "188",
+    "name": "MASSA MADEIRA IMBUIA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "79",
+    "name": "MASSA PARA MADEIRA BRANCA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "144",
+    "name": "MDF 15MM BRANCO",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "160",
+    "name": "MDF BRANCO 12MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "182",
+    "name": "MDF BRANCO 18MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "155",
+    "name": "MDF CRU 3MM CORRETO",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "121",
+    "name": "MESA PÉ DE CEBOLA 35CM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "310",
+    "name": "METALON 15X15",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "98",
+    "name": "METALON 20X20",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "227",
+    "name": "METALON 80X40X16",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "200",
+    "name": "PARAFUSO 3,5X20MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "199",
+    "name": "PARAFUSO 4,5X16MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "111",
+    "name": "PARAFUSO 4,5X60",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "315",
+    "name": "PARAFUSO 4X25",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "114",
+    "name": "PARAFUSO CHIP 3,5X16",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "279",
+    "name": "PARAFUSO CHIP 42X13",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "278",
+    "name": "PARAFUSO CHIP 5,0X30",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 10.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "196",
+    "name": "PARAFUSO CHIP 5,0X40",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "254",
+    "name": "PARAFUSO CHIP 5,0 X 70CM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "195",
+    "name": "PARAFUSO CHIP 5,0X80MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "65",
+    "name": "PARAFUSO CHIP CHA 3,5X14",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 5.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "66",
+    "name": "PARAFUSO CHIP CHA 3,5X16",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "67",
+    "name": "PARAFUSO CHIP CHA 4X40",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "302",
+    "name": "PERFIL U 3XCH 14",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "42",
+    "name": "PF CHIP RP CB CH PH BC",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "149",
+    "name": "PINOS PINADORES 3,5",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "150",
+    "name": "PINOS PINADORES 4,5",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "151",
+    "name": "PINOS PINADORES 5",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "316",
+    "name": "PRETO FOSCO PU",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "183",
+    "name": "PRIMER UNIVERSAL CINZA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "78",
+    "name": "QUEROLACXE",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "146",
+    "name": "QUEROSENE EUCATEX 5 L",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "180",
+    "name": "ROLAMENTO DE MESA 94X94MM",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "43",
+    "name": "ROST OFF INDUSTRY",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "186",
+    "name": "SELADORA EUCATEX EXTRA 18L",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "69",
+    "name": "TABUA DE MADEIRA 20 X 4",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "122",
+    "name": "TAMPO MESA PÉ DE CEBOLA",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "234",
+    "name": "THINER ACABAMENTO 5 L EUCATEX 9800",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "170",
+    "name": "THINNER LIMPEZA 5LT EUCATEX 9100 1GL",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "100",
+    "name": "TINTA EUCATEX 3,600 LT",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "128",
+    "name": "TNT 40/1,40 PRETO",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "311",
+    "name": "TUBO RED 31.75 (1.1/4)",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "312",
+    "name": "TUBO RED 38.10(1.1/2)",
+    "sector": "MARCENARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "164",
+    "name": "ZARCAO LARANJA EUCATEX",
     "sector": "MARCENARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1499,8 +1481,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "275",
-    "name": "BASCULA DE VIDRO TEMPERADO 8MM",
+    "code": "305",
+    "name": "APARADOR CENTRO",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1508,8 +1490,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "276",
-    "name": "BLINDEX KIT 1 PARA BOX DE CORRER",
+    "code": "242",
+    "name": "ASSENTO CADEIRA NOVA 0,406 X 0,383 X 0,05",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1517,8 +1499,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "277",
-    "name": "BLINDEX KIT 2 PARA BOX DE CORRER",
+    "code": "172",
+    "name": "BASE DE MESA CONE",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1526,8 +1508,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "278",
-    "name": "BOTÃO JOCKEY PARA ESPELHO 5/8",
+    "code": "185",
+    "name": "BASE DE MESA ESTRELA",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1535,8 +1517,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "279",
-    "name": "CALÇO DE PVC PARA VIDRO 2MM",
+    "code": "68",
+    "name": "BUCHA COMUM 6 CM",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1544,8 +1526,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "280",
-    "name": "CALÇO DE PVC PARA VIDRO 5MM",
+    "code": "153",
+    "name": "CADEIRA ESTOFADA",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1553,8 +1535,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "281",
-    "name": "CHAPA DE VIDRO LAMINADO 4+4 INCOLOR",
+    "code": "159",
+    "name": "CAIXA 01- 600X210X50",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1562,8 +1544,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "282",
-    "name": "CHAPA DE VIDRO LAMINADO 6+6 FUME",
+    "code": "187",
+    "name": "CAIXA 02 -500X350X180",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1571,8 +1553,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "283",
-    "name": "CHAPA DE VIDRO TEMPERADO 10MM BRONZE",
+    "code": "152",
+    "name": "CAIXA 03-800X210X60 PAPELÃO",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1580,8 +1562,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "284",
-    "name": "CHAPA DE VIDRO TEMPERADO 10MM FUME",
+    "code": "89",
+    "name": "CAIXA 05 CADEIRA FORDOS C/ 10 UNIDADES",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1589,8 +1571,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "285",
-    "name": "CHAPA DE VIDRO TEMPERADO 10MM INCOLOR",
+    "code": "198",
+    "name": "CANCELADO",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1598,62 +1580,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "286",
-    "name": "CHAPA DE VIDRO TEMPERADO 8MM BRONZE",
-    "sector": "VIDRAÇARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "287",
-    "name": "CHAPA DE VIDRO TEMPERADO 8MM FUME",
-    "sector": "VIDRAÇARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "288",
-    "name": "CHAPA DE VIDRO TEMPERADO 8MM INCOLOR",
-    "sector": "VIDRAÇARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "289",
-    "name": "FECHADURA PARA PORTA DE VIDRO 1520",
-    "sector": "VIDRAÇARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "290",
-    "name": "GAXETA DE BORRACHA P/ VIDRO 10MM",
-    "sector": "VIDRAÇARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "291",
-    "name": "GAXETA DE BORRACHA P/ VIDRO 8MM",
-    "sector": "VIDRAÇARIA",
-    "unit": "UN",
-    "stock": 0.0,
-    "minStock": 5,
-    "classification": "Matéria Prima"
-  },
-  {
-    "code": "292",
-    "name": "KIT ENGENHARIA PARA PORTA DE VIDRO",
+    "code": "59",
+    "name": "CANCELADO,,",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1662,7 +1590,43 @@ const INITIAL_PRODUCTS = [
   },
   {
     "code": "293",
-    "name": "PERFIL U DE ALUMINIO PARA VIDRO 10MM",
+    "name": "CAVILHA 10 X 50MM (PACOTE COM 500 )",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "64",
+    "name": "CHAPA DE ESPELHO 3MM AVILSA 2,20X3,210",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "194",
+    "name": "CHAPA DE ESPELHO 3MM AVILSA 2,40X3,210",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "32",
+    "name": "CHAPA MADEIRA BRANCA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "91",
+    "name": "COLA DE MADEIRA GALÃO DE 5 KGS",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1671,7 +1635,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "code": "294",
-    "name": "PERFIL U DE ALUMINIO PARA VIDRO 8MM",
+    "name": "COLA TECK BONDER",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1679,8 +1643,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "295",
-    "name": "VENTOSA DUPLA PARA TRANSPORTE DE VIDRO",
+    "code": "63",
+    "name": "CONECTOR MAGUEIRA DE LED",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1688,8 +1652,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "296",
-    "name": "VENTOSA SIMPLES PARA VIDRO",
+    "code": "223",
+    "name": "CONPENSADO PARICA NAVEL 15",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1697,8 +1661,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "297",
-    "name": "SUPORTE PINO PARA PRATELEIRA DE VIDRO",
+    "code": "116",
+    "name": "CORREDIÇA",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1706,8 +1670,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "298",
-    "name": "CHAVE ALLEN 3MM PARA FERRAGEM",
+    "code": "131",
+    "name": "DOBRADIÇA",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1715,8 +1679,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "299",
-    "name": "CHAVE ALLEN 4MM PARA FERRAGEM",
+    "code": "243",
+    "name": "ENCOSTO CADEIRA NOVA 0,40 X 0,20 X 0,05",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1724,8 +1688,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "300",
-    "name": "DISCO DE CORTE DIAMANTADO 110MM",
+    "code": "233",
+    "name": "ESA 10 NEW - M - 5 X 1,9 X 0,008 M MANTA",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1733,8 +1697,8 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "301",
-    "name": "TALHADEIRA PARA VIDRO",
+    "code": "231",
+    "name": "ESA 12 NEW P 0,41 X 0,48 X 0,02 ENCOSTO",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1742,8 +1706,341 @@ const INITIAL_PRODUCTS = [
     "classification": "Matéria Prima"
   },
   {
-    "code": "302",
-    "name": "MARTELO DE BORRACHA 400G",
+    "code": "232",
+    "name": "ESA 14 NEW - P - 0,41 X 0,41 X 0,03 M ACENTO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "245",
+    "name": "ESA 339 AD-P 0,4 X 0,2 X 0,05M",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "246",
+    "name": "ESA CT21 F -P 0,406 X 0,383 X 0,05M",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "108",
+    "name": "ESPELHO 4 MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "133",
+    "name": "ESPELHO BRONZE",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "132",
+    "name": "ESPELHO FUME",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "54",
+    "name": "ESPELHO PRO INCOLOR 04MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "239",
+    "name": "ESPUMA 0,41 X 0,418X 0,02",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "244",
+    "name": "ESPUMA 0,41 X 0,41 X 0,03.",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "268",
+    "name": "ESPUMA D18 BRANCA LB 0.8MM COM 5 MTS",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "124",
+    "name": "ESPUMA D20 BRANCA L400 01 CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "125",
+    "name": "ESPUMA D33 LARANJA L900 05 CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "76",
+    "name": "EUCALUX PRETO FOSCO 3,6L",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "92",
+    "name": "EUCATEX 1,21 X 2,12",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "93",
+    "name": "EUCATEX 1,22 X 1,22",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "31",
+    "name": "EUCATEX 3MM 2,33X0,50",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "327",
+    "name": "EUCATEX BRANCO FOSCO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "112",
+    "name": "FELTRO ADESIVO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "237",
+    "name": "FEMIA DE SAPATA PARA MESA PÉ DE CEBOLA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "264",
+    "name": "FERRO MECANICO 1/4-1,6",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "58",
+    "name": "FITA ADESIVA AA40",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "272",
+    "name": "FITA CREPE FINA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "273",
+    "name": "FITA CREPE GROSSA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "181",
+    "name": "FITA DE LED A PILHA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "184",
+    "name": "FITA DE LED FRIO A PILHA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "109",
+    "name": "FITA DUPLA FACE FINA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "99",
+    "name": "FITA DUPLA FACE GROSSA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "4",
+    "name": "FIXA ESPELHO BRANCO 400G",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "173",
+    "name": "GRAMPO 80/14 15.670",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "208",
+    "name": "GRAMPO ESTOFAMENTO 80.13 CX 15.750",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "202",
+    "name": "GRAMPO ESTRUTUTAL 14/35 CX COM 14.400",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "115",
+    "name": "GRAMPO GRAMPEADOR 80/14 C/8250PEÇAS",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "224",
+    "name": "GRAMPO P/GRAMPEADOR 80/16 C-7500 PEÇAS",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "306",
+    "name": "LAMPADA 15W",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "323",
+    "name": "MADEIRA PINUS 10 X 4 X 3,0",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "123",
+    "name": "MALHA DE EMBALAGEM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "240",
+    "name": "MANTAS 0,008 FATIADAS",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "241",
+    "name": "MANTAS FATIADAS COM 10 CM E 40 MANTAS FATIADAS COM 66 CM",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1752,7 +2049,862 @@ const INITIAL_PRODUCTS = [
   },
   {
     "code": "303",
-    "name": "TRENA DE FIBRA 5 METROS",
+    "name": "MDF 12MM 275X244",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "30",
+    "name": "MDF 12MM CRU 275X220 CORRETO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "144",
+    "name": "MDF 15MM BRANCO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "154",
+    "name": "MDF 2,8MM CRU 275X213",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "182",
+    "name": "MDF BRANCO 18MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "321",
+    "name": "MDF BRANCO OR 2F 09MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "213",
+    "name": "MDF BRANCO OR 2F CORRETO 18MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "222",
+    "name": "MDF CRU 06MM CORRETO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "94",
+    "name": "MDF CRU 12MM 1,84X2,75",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "96",
+    "name": "MDF CRU 12MM2,20X2,75",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "167",
+    "name": "MDF CRU 18MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "178",
+    "name": "MDF CRU 25MM 2,80X1,90",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "189",
+    "name": "MDF CRU 25MM 2,80X2,20",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "155",
+    "name": "MDF CRU 3MM CORRETO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "229",
+    "name": "MDF CRU LIXADO 6,00X1850X2750",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "214",
+    "name": "MDF PRETO 15MM 2F",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "121",
+    "name": "MESA PÉ DE CEBOLA 35CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "215",
+    "name": "MESA PÉ DE CEBOLA 40 CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "263",
+    "name": "MESA PÉ DE CEBOLA 50 CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "219",
+    "name": "MESA PE DE CEBOLA 60 CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "218",
+    "name": "MESA PÉ DE CEBOLA 70CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "267",
+    "name": "METALON 50X30XCH 18-8,95",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "134",
+    "name": "MOLDURA DE ESPELHO PRATA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "135",
+    "name": "MOLDURA DE ESPELHO PRETA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "114",
+    "name": "PARAFUSO CHIP 3,5X16",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "196",
+    "name": "PARAFUSO CHIP 5,0X40",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "65",
+    "name": "PARAFUSO CHIP CHA 3,5X14",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "197",
+    "name": "PARAFUSO P/ PUXADOR 4X18MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "280",
+    "name": "PÉ DE CADEIRA FRENTE 44X4X3",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "216",
+    "name": "PÉ DE CADEIRA TRASEIRO 52X4X3",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "291",
+    "name": "PE DE CEBOLA 10CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "288",
+    "name": "PEGADOR DE CADEIRA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "175",
+    "name": "PELÍCULA BRANCA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "177",
+    "name": "PELÍCULA DE MARMÓRE",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "176",
+    "name": "PELÍCULA PRETA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "22",
+    "name": "PERFIL(01) SIMPLES 45 X 17....",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "292",
+    "name": "PERFIL TUB 61 X 54MM X 2MTS",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "221",
+    "name": "PERFIL TUB C/ CORTE 5 X 22 X 2 MTS",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "220",
+    "name": "PERFIL TUB C CORTE 10 X 22 X 2 PCT C/100",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "157",
+    "name": "PINO DE 20MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "149",
+    "name": "PINOS PINADORES 3,5",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "151",
+    "name": "PINOS PINADORES 5",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "248",
+    "name": "PINTURA PÉ DE CADEIRA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "156",
+    "name": "PLACA DE ISOPOR GROSSA 2250X100X35MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "225",
+    "name": "PLACA DE ISOPOR QUADRADINHO 2250 X 40 X 35MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "87",
+    "name": "PLACAS DE ISOPOR",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "212",
+    "name": "PLACAS DE ISOPOR FINA 2250 X 100 X12MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "136",
+    "name": "PLASTICO FILME",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "137",
+    "name": "PLASTICO FILME AMARELO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "249",
+    "name": "POLTRONA OPALA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "316",
+    "name": "PRETO FOSCO PU",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "281",
+    "name": "PUXADOR 42X4X3",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "81",
+    "name": "PUXADOR DE CRISTAL 30MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "161",
+    "name": "PUXADOR DE CRISTAL 30MM DOURADO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "146",
+    "name": "QUEROSENE EUCATEX 5 L",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "113",
+    "name": "RODINHAS DE CABECEIRA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "180",
+    "name": "ROLAMENTO DE MESA 94X94MM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "80",
+    "name": "ROLO DE LED C/ 100 METROS QUENTE 110V",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "163",
+    "name": "ROLO DE LED C/ 100 METROS QUENTE 220V",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "162",
+    "name": "ROLO DE LED FRIO C/ 100 METROS 110V",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "165",
+    "name": "ROLO DE LED FRIO C/ 100 METROS 220V",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "299",
+    "name": "SACO DE EMBALAGEM 15X20",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "324",
+    "name": "SAPATA GRANDE 5/16 X 7/8",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "322",
+    "name": "SAPATA ROSCA METÁLICA PEQUENA 1/4",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "186",
+    "name": "SELADORA EUCATEX EXTRA 18L",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "169",
+    "name": "SELADORA EXTRA 3,6LT EUCATEX 1GL",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "138",
+    "name": "SILICONE ACETICO 260G PRETO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "139",
+    "name": "SILICONE ACETICO 280ML WHURT",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "270",
+    "name": "SILICONE BRONZE",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "271",
+    "name": "SILICONE CINZA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "174",
+    "name": "SILICONE INCOLOR WURTH",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "309",
+    "name": "SOBRE TAMPO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "228",
+    "name": "SUPORTE ESPELHO ORGANICO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "283",
+    "name": "TAMPA DE MESA 1M",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "282",
+    "name": "TAMPA DE MESA 90CM",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "308",
+    "name": "TAMPA PLASTICA 20X20",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "307",
+    "name": "TAMPA PLASTICA 50X30",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "325",
+    "name": "TAMPO DE METALON 50X20",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "122",
+    "name": "TAMPO MESA PÉ DE CEBOLA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "255",
+    "name": "TECIDO LINHA SATURNO 12 NATURAL",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "207",
+    "name": "TECIDO LINHO SATURNO 07 GELO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "230",
+    "name": "TECIDO LINHO SATURNO 13 TERRACOTA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "247",
+    "name": "TECIDO MARFIM INCA CORTEX",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "295",
+    "name": "TECIDO RATAN",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "210",
+    "name": "TECIDO VELUDO INCA CASTOR",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "206",
+    "name": "TECIDO VELUDO INCA PRETO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "211",
+    "name": "TECIDO VELUDO INCA SALMÃO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "256",
+    "name": "TECIDO VELUDO INCA VERDE",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "234",
+    "name": "THINER ACABAMENTO 5 L EUCATEX 9800",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "296",
+    "name": "THINNER ACABAMENTO 9800 18L",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "170",
+    "name": "THINNER LIMPEZA 5LT EUCATEX 9100 1GL",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "300",
+    "name": "TINTA DOURADA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "326",
+    "name": "TINTA PRATA",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "128",
+    "name": "TNT 40/1,40 PRETO",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "266",
+    "name": "T UBO 3/4 X CH 20 - 2,56",
+    "sector": "VIDRAÇARIA",
+    "unit": "UN",
+    "stock": 0.0,
+    "minStock": 5,
+    "classification": "Matéria Prima"
+  },
+  {
+    "code": "265",
+    "name": "T UBO 5/8 X CH20-2,15",
     "sector": "VIDRAÇARIA",
     "unit": "UN",
     "stock": 0.0,
@@ -1799,26 +2951,25 @@ export default function App() {
     if (!user) return;
     const prodRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
     
+    // Força a atualização/inserção de todos os 320 produtos independentemente do estado anterior
     getDocs(prodRef).then(async (snapshot) => {
-      if (snapshot.empty) {
-        const batch = writeBatch(db);
-        INITIAL_PRODUCTS.forEach((p, idx) => {
-          const pId = 'prod_import_' + idx;
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', pId);
-          batch.set(docRef, {
-            name: p.name,
-            sector: p.sector,
-            classification: p.classification,
-            minStock: p.minStock,
-            stock: p.stock,
-            code: p.code,
-            unit: p.unit,
-            updatedAt: new Date().toISOString()
-          });
-        });
-        await batch.commit();
-      }
-    }).catch(err => console.error("Erro ao verificar/popular produtos:", err));
+      const batch = writeBatch(db);
+      INITIAL_PRODUCTS.forEach((p, idx) => {
+        const pId = 'prod_import_' + idx;
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', pId);
+        batch.set(docRef, {
+          name: p.name,
+          sector: p.sector,
+          classification: p.classification,
+          minStock: p.minStock,
+          stock: p.stock,
+          code: p.code,
+          unit: p.unit,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      });
+      await batch.commit();
+    }).catch(err => console.error("Erro ao popular produtos:", err));
 
     const unsubProd = onSnapshot(prodRef, (snapshot) => {
       const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
