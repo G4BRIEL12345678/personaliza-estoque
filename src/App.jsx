@@ -127,12 +127,10 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // Filtros de Estoque
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSector, setFilterSector] = useState('Todos');
   const [filterClassification, setFilterClassification] = useState('Todas');
 
-  // Modais e Formulários de Produto
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formCode, setFormCode] = useState('');
@@ -143,7 +141,6 @@ export default function App() {
   const [formMinStock, setFormMinStock] = useState('5');
   const [formInitialStock, setFormInitialStock] = useState('0');
 
-  // Modal e Pesquisa de Movimentação
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [moveType, setMoveType] = useState('Entrada');
   const [moveSectorFilter, setMoveSectorFilter] = useState('Todos');
@@ -153,7 +150,6 @@ export default function App() {
   const [moveEmployee, setMoveEmployee] = useState('');
   const [moveNote, setMoveNote] = useState('');
 
-  // Compras
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchSectorFilter, setPurchSectorFilter] = useState('Todos');
   const [purchSearchQuery, setPurchSearchQuery] = useState('');
@@ -162,11 +158,9 @@ export default function App() {
   const [purchSupplier, setPurchSupplier] = useState('');
   const [purchStatusFilter, setPurchStatusFilter] = useState('Todos');
 
-  // Funcionários
   const [newEmployeeName, setNewEmployeeName] = useState('');
   const [selectedEmpForHistory, setSelectedEmpForHistory] = useState('Todos');
 
-  // Resumo
   const [summarySector, setSummarySector] = useState('Todos');
   const [summaryMonth, setSummaryMonth] = useState('Todos');
   const [summaryPeriodMonths, setSummaryPeriodMonths] = useState('12');
@@ -209,12 +203,12 @@ export default function App() {
       if (snapshot.empty || !hasNewList) {
         const batch = writeBatch(db);
         snapshot.docs.forEach(d => {
-          if (d.id.startsWith('emp_init_') || d.id.startsWith('emp_real_')) {
+          if (d.id.startsWith('emp_init_') || d.id.startsWith('emp_real_') || d.id.startsWith('emp_img_')) {
             batch.delete(d.ref);
           }
         });
         INITIAL_EMPLOYEES.forEach((empName, idx) => {
-          const eId = 'emp_img_' + idx;
+          const eId = 'emp_fixed_' + idx;
           batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', eId), {
             name: empName,
             createdAt: new Date().toISOString()
@@ -567,15 +561,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
-      {/* HEADER PROFISSIONAL EXECUTIVO */}
-      <header className="bg-slate-950 border-b border-slate-800 shadow-2xl px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-40 backdrop-blur-md bg-slate-950/90">
+      {/* HEADER PROFISSIONAL EXECUTIVO (ESTICADO DE PONTA A PONTA) */}
+      <header className="bg-slate-950 border-b border-slate-800 shadow-2xl px-4 md:px-10 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-40 backdrop-blur-md bg-slate-950/90 w-full">
         <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
+          {/* Logo Marrom com Escrita Branca */}
+          <div className="w-12 h-12 rounded-2xl bg-[#3D261A] border border-[#5A3A29] flex items-center justify-center font-black text-white text-2xl shadow-xl">
             P
           </div>
           <div>
             <h1 className="text-xl font-black tracking-widest text-white uppercase flex items-center gap-2">
-              Personaliza <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">PRO</span>
+              Personaliza <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">PRO</span>
             </h1>
             <p className="text-xs text-slate-400 font-medium">Painel Executivo de Gestão de Estoque & Suprimentos</p>
           </div>
@@ -600,10 +595,11 @@ export default function App() {
         </nav>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
+      {/* CORPO PRINCIPAL ESTICADO DE PONTA A PONTA (W-FULL PX-4 MD:PX-8) */}
+      <main className="flex-1 w-full px-4 md:px-8 py-6">
         {/* ABA 1: ESTOQUE */}
         {activeTab === 'estoque' && (
-          <div className="space-y-6">
+          <div className="space-y-6 w-full">
             <div className="flex flex-wrap gap-2.5">
               {['Todos', ...SECTORS].map(sec => (
                 <button
@@ -616,7 +612,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg w-full">
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <input 
                   type="text" 
@@ -646,8 +642,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden w-full">
+              <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
@@ -705,8 +701,8 @@ export default function App() {
 
         {/* ABA 2: MOVIMENTAÇÃO */}
         {activeTab === 'movimentacao' && (
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg">
+          <div className="space-y-6 w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg w-full">
               <div>
                 <h2 className="text-lg font-bold text-white">Histórico Executivo de Movimentações</h2>
                 <p className="text-xs text-slate-400">Registo completo de todas as entradas, consumo e retiradas por funcionários.</p>
@@ -716,8 +712,8 @@ export default function App() {
               </button>
             </div>
 
-            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden w-full">
+              <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
@@ -759,8 +755,8 @@ export default function App() {
 
         {/* ABA 3: COMPRAS */}
         {activeTab === 'compras' && (
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg">
+          <div className="space-y-6 w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg w-full">
               <div>
                 <h2 className="text-lg font-bold text-white">Central de Suprimentos & Compras</h2>
                 <p className="text-xs text-slate-400">Edite quantidades a comprar ou fornecedores diretamente na tabela a qualquer momento.</p>
@@ -777,8 +773,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden w-full">
+              <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
@@ -840,7 +836,7 @@ export default function App() {
 
         {/* ABA 4: FUNCIONÁRIOS */}
         {activeTab === 'funcionarios' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
             <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-5">
               <div>
                 <h2 className="text-lg font-bold text-white">Equipa ({employees.length})</h2>
@@ -874,7 +870,7 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto w-full">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
@@ -908,10 +904,10 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 5: RESUMO E RELATÓRIOS (COM FILTROS DE SETOR, MÊS, PERÍODO ATÉ 1 ANO E ESTOQUE MÍNIMO) */}
+        {/* ABA 5: RESUMO E RELATÓRIOS */}
         {activeTab === 'resumo' && (
-          <div className="space-y-6">
-            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 flex flex-wrap gap-5 items-center justify-between">
+          <div className="space-y-6 w-full">
+            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 flex flex-wrap gap-5 items-center justify-between w-full">
               <div>
                 <h3 className="text-lg font-bold text-white">Filtros de Relatórios e Auditoria</h3>
                 <p className="text-xs text-slate-400">Analise por setor, mês específico ou janela de até 1 ano.</p>
@@ -949,7 +945,7 @@ export default function App() {
             </div>
 
             {/* ALERTA ESTOQUE MÍNIMO */}
-            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-rose-500/30 space-y-4">
+            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-rose-500/30 space-y-4 w-full">
               <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                 <div>
                   <h3 className="text-lg font-black text-rose-400 flex items-center gap-2.5">
@@ -963,7 +959,7 @@ export default function App() {
               {lowStockProducts.length === 0 ? (
                 <p className="text-sm text-emerald-400 font-bold py-6 text-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl">Nenhum produto abaixo do estoque mínimo no filtro atual.</p>
               ) : (
-                <div className="overflow-x-auto max-h-72 overflow-y-auto border border-slate-800 rounded-xl bg-slate-900/40">
+                <div className="overflow-x-auto max-h-72 overflow-y-auto border border-slate-800 rounded-xl bg-slate-900/40 w-full">
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="bg-slate-900 text-slate-400 text-xs uppercase font-extrabold sticky top-0">
@@ -993,7 +989,7 @@ export default function App() {
             </div>
 
             {/* TOTAIS ENTRADAS E SAÍDAS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
               <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
                 <h4 className="font-extrabold text-white border-b border-slate-800 pb-2 flex justify-between">
                   <span>Total de Entradas</span>
@@ -1010,7 +1006,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 w-full">
               <div>
                 <h2 className="text-lg font-bold text-white">Exportação Executiva</h2>
                 <p className="text-xs text-slate-400">Gere relatórios oficiais em Excel ou PDF para auditoria.</p>
