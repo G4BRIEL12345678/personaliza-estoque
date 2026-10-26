@@ -166,6 +166,12 @@ export default function App() {
   const [summaryPeriodMonths, setSummaryPeriodMonths] = useState('12');
 
   useEffect(() => {
+    // Injeta estilo global via JS para garantir fundo sem margens brancas no body
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.backgroundColor = '#020617';
+    document.body.style.color = '#f8fafc';
+
     signInAnonymously(auth).catch((err) => console.error("Erro Auth:", err));
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
     return () => unsubscribe();
@@ -203,12 +209,10 @@ export default function App() {
       if (snapshot.empty || !hasNewList) {
         const batch = writeBatch(db);
         snapshot.docs.forEach(d => {
-          if (d.id.startsWith('emp_init_') || d.id.startsWith('emp_real_') || d.id.startsWith('emp_img_') || d.id.startsWith('emp_fixed_')) {
-            batch.delete(d.ref);
-          }
+          if (d.id.startsWith('emp_')) batch.delete(d.ref);
         });
         INITIAL_EMPLOYEES.forEach((empName, idx) => {
-          const eId = 'emp_v2_' + idx;
+          const eId = 'emp_pro_' + idx;
           batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', eId), {
             name: empName,
             createdAt: new Date().toISOString()
@@ -551,19 +555,19 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#111827] text-white flex flex-col items-center justify-center font-sans">
+      <div className="w-screen h-screen m-0 p-0 bg-slate-950 text-slate-100 flex flex-col items-center justify-center font-sans">
         <div className="w-14 h-14 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-xl tracking-wide font-medium text-amber-400">Personaliza — Carregando Sistema Executivo...</p>
+        <p className="text-xl tracking-wide font-medium text-amber-400">Personaliza — Carregando Painel Executivo...</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col antialiased m-0 p-0 selection:bg-amber-500 selection:text-slate-950">
-      {/* HEADER EXECUTIVO DE PONTA A PONTA (SEM BORDAS LATERAIS BRANCAS) */}
-      <header className="w-full bg-slate-950 border-b border-slate-800 shadow-2xl px-4 md:px-8 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-40 backdrop-blur-md bg-slate-950/95">
+    <div className="w-screen min-h-screen m-0 p-0 bg-slate-950 text-slate-100 font-sans flex flex-col antialiased overflow-x-hidden selection:bg-amber-500 selection:text-slate-950">
+      {/* HEADER EXECUTIVO DE PONTA A PONTA (SEM NENHUMA MARGEM OU BORDA) */}
+      <header className="w-full m-0 bg-slate-900/90 border-b border-slate-800 shadow-2xl px-6 md:px-12 py-5 flex flex-col lg:flex-row justify-between items-center gap-5 sticky top-0 z-50 backdrop-blur-xl">
         <div className="flex items-center gap-4">
-          {/* Logo Marrom com Escrita Branca */}
+          {/* Logo Marrom Exato com Escrita Branca */}
           <div className="w-12 h-12 rounded-2xl bg-[#3D261A] border border-[#5A3A29] flex items-center justify-center font-black text-white text-2xl shadow-xl">
             P
           </div>
@@ -575,7 +579,7 @@ export default function App() {
           </div>
         </div>
 
-        <nav className="flex flex-wrap gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-inner">
+        <nav className="flex flex-wrap gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800/80 shadow-inner">
           <button onClick={() => setActiveTab('estoque')} className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${activeTab === 'estoque' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`}>
             📦 Estoque ({products.length})
           </button>
@@ -594,8 +598,8 @@ export default function App() {
         </nav>
       </header>
 
-      {/* CONTEÚDO PRINCIPAL 100% ESTICADO DE PONTA A PONTA */}
-      <main className="w-full flex-1 px-4 md:px-8 py-6 space-y-6">
+      {/* CORPO PRINCIPAL 100% PREENCHIDO ATÉ AS BORDAS */}
+      <main className="w-full flex-1 px-4 md:px-10 py-8 space-y-8 bg-slate-950">
         {/* ABA 1: ESTOQUE */}
         {activeTab === 'estoque' && (
           <div className="space-y-6 w-full">
@@ -604,26 +608,26 @@ export default function App() {
                 <button
                   key={sec}
                   onClick={() => setFilterSector(sec)}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all shadow-sm ${filterSector === sec ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-amber-500/20 scale-105' : 'bg-slate-950/60 text-slate-300 border-slate-800 hover:bg-slate-800'}`}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all shadow-sm ${filterSector === sec ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-amber-500/20 scale-105' : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:bg-slate-800'}`}
                 >
                   {sec === 'Todos' ? `Todos os Setores (${products.length})` : `${sec} (${products.filter(p => p.sector === sec).length})`}
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg w-full">
-              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 shadow-xl w-full">
+              <div className="flex flex-wrap items-center gap-3.5 w-full md:w-auto">
                 <input 
                   type="text" 
                   placeholder="🔍 Pesquisar por código ou nome do produto..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full md:w-96 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
+                  className="w-full md:w-[420px] px-4 py-3.5 bg-slate-950 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
                 />
                 <select 
                   value={filterClassification} 
                   onChange={(e) => setFilterClassification(e.target.value)}
-                  className="py-3 px-4 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:outline-none focus:border-amber-500"
+                  className="py-3.5 px-4 bg-slate-950 border border-slate-700/80 rounded-xl text-sm font-semibold text-slate-200 focus:outline-none focus:border-amber-500"
                 >
                   <option value="Todas">Todas Classificações</option>
                   <option value="Matéria Prima">Matéria Prima</option>
@@ -631,58 +635,58 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="flex gap-2.5 w-full md:w-auto">
-                <button onClick={() => { setMoveType('Entrada'); setMoveSectorFilter(filterSector); setIsMoveModalOpen(true); }} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
+              <div className="flex gap-3 w-full md:w-auto">
+                <button onClick={() => { setMoveType('Entrada'); setMoveSectorFilter(filterSector); setIsMoveModalOpen(true); }} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-6 py-3.5 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
                   + Lançar Movimento
                 </button>
-                <button onClick={() => { setEditingProduct(null); setFormCode(''); setFormName(''); setFormSector(filterSector === 'Todos' ? 'SUBLIMAÇÃO' : filterSector); setFormMinStock('5'); setFormInitialStock('0'); setIsModalOpen(true); }} className="bg-slate-800 text-white px-5 py-3 rounded-xl font-semibold text-sm hover:bg-slate-700 transition border border-slate-700 shadow-lg">
+                <button onClick={() => { setEditingProduct(null); setFormCode(''); setFormName(''); setFormSector(filterSector === 'Todos' ? 'SUBLIMAÇÃO' : filterSector); setFormMinStock('5'); setFormInitialStock('0'); setIsModalOpen(true); }} className="bg-slate-800 text-white px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-slate-700 transition border border-slate-700 shadow-lg">
                   + Novo Produto
                 </button>
               </div>
             </div>
 
-            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden w-full">
+            <div className="bg-slate-900/80 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden w-full">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
-                      <th className="p-4">Cód.</th>
-                      <th className="p-4">Descrição do Produto</th>
-                      <th className="p-4">Setor</th>
-                      <th className="p-4">Unid.</th>
-                      <th className="p-4">Classificação</th>
-                      <th className="p-4 text-center">Estoque Atual</th>
-                      <th className="p-4 text-center">Est. Mínimo</th>
-                      <th className="p-4 text-center">Status</th>
-                      <th className="p-4 text-right">Ações</th>
+                    <tr className="bg-slate-950 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
+                      <th className="p-4.5">Cód.</th>
+                      <th className="p-4.5">Descrição do Produto</th>
+                      <th className="p-4.5">Setor</th>
+                      <th className="p-4.5">Unid.</th>
+                      <th className="p-4.5">Classificação</th>
+                      <th className="p-4.5 text-center">Estoque Atual</th>
+                      <th className="p-4.5 text-center">Est. Mínimo</th>
+                      <th className="p-4.5 text-center">Status</th>
+                      <th className="p-4.5 text-right">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 text-sm">
+                  <tbody className="divide-y divide-slate-800/70 text-sm">
                     {filteredProducts.length === 0 ? (
-                      <tr><td colSpan="9" className="p-10 text-center text-slate-500 font-medium">Nenhum produto encontrado.</td></tr>
+                      <tr><td colSpan="9" className="p-12 text-center text-slate-500 font-medium">Nenhum produto encontrado.</td></tr>
                     ) : (
                       filteredProducts.map(prod => {
                         const isLow = prod.stock <= prod.minStock;
                         return (
                           <tr key={prod.id} className="hover:bg-slate-800/40 transition">
-                            <td className="p-4 text-xs font-mono font-bold text-amber-400 bg-slate-900/40">{prod.code || '-'}</td>
-                            <td className="p-4 font-bold text-slate-100">{prod.name}</td>
-                            <td className="p-4"><span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-lg text-xs font-bold border border-slate-700">{prod.sector}</span></td>
-                            <td className="p-4 text-xs text-slate-400 font-bold">{prod.unit || 'UN'}</td>
-                            <td className="p-4">
-                              <select value={prod.classification || 'Matéria Prima'} onChange={(e) => handleUpdateField(prod, 'classification', e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-300">
+                            <td className="p-4.5 text-xs font-mono font-bold text-amber-400 bg-slate-950/50">{prod.code || '-'}</td>
+                            <td className="p-4.5 font-bold text-slate-100">{prod.name}</td>
+                            <td className="p-4.5"><span className="bg-slate-950 text-slate-300 px-3 py-1 rounded-lg text-xs font-bold border border-slate-800">{prod.sector}</span></td>
+                            <td className="p-4.5 text-xs text-slate-400 font-bold">{prod.unit || 'UN'}</td>
+                            <td className="p-4.5">
+                              <select value={prod.classification || 'Matéria Prima'} onChange={(e) => handleUpdateField(prod, 'classification', e.target.value)} className="bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300">
                                 <option value="Matéria Prima">Matéria Prima</option>
                                 <option value="Consumo">Consumo</option>
                               </select>
                             </td>
-                            <td className="p-4 text-center font-black text-base text-white">{prod.stock}</td>
-                            <td className="p-4 text-center">
-                              <input type="number" key={`min_${prod.id}_${prod.minStock}`} defaultValue={prod.minStock} onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)} className="w-16 text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs font-bold text-slate-200" />
+                            <td className="p-4.5 text-center font-black text-base text-white">{prod.stock}</td>
+                            <td className="p-4.5 text-center">
+                              <input type="number" key={`min_${prod.id}_${prod.minStock}`} defaultValue={prod.minStock} onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)} className="w-16 text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1.5 text-xs font-bold text-slate-200" />
                             </td>
-                            <td className="p-4 text-center">
-                              {isLow ? <span className="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-black tracking-wide">REPOR</span> : <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-black tracking-wide">OK</span>}
+                            <td className="p-4.5 text-center">
+                              {isLow ? <span className="bg-rose-500/15 text-rose-400 border border-rose-500/30 px-3.5 py-1 rounded-full text-xs font-black tracking-wide">REPOR</span> : <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3.5 py-1 rounded-full text-xs font-black tracking-wide">OK</span>}
                             </td>
-                            <td className="p-4 text-right space-x-1.5 whitespace-nowrap">
+                            <td className="p-4.5 text-right space-x-2 whitespace-nowrap">
                               <button onClick={() => sendProductToPurchases(prod)} className="px-3 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-bold hover:bg-amber-500 hover:text-slate-950 transition">Comprar</button>
                               <button onClick={() => openEditProduct(prod)} className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700 transition">Editar</button>
                               <button onClick={() => handleDeleteProduct(prod.id)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20 transition">Excluir</button>
@@ -701,47 +705,47 @@ export default function App() {
         {/* ABA 2: MOVIMENTAÇÃO */}
         {activeTab === 'movimentacao' && (
           <div className="space-y-6 w-full">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 shadow-xl w-full">
               <div>
                 <h2 className="text-lg font-bold text-white">Histórico Executivo de Movimentações</h2>
                 <p className="text-xs text-slate-400">Registo completo de todas as entradas, consumo e retiradas por funcionários.</p>
               </div>
-              <button onClick={() => { setMoveType('Entrada'); setIsMoveModalOpen(true); }} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
+              <button onClick={() => { setMoveType('Entrada'); setIsMoveModalOpen(true); }} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-6 py-3.5 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
                 + Nova Movimentação
               </button>
             </div>
 
-            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden w-full">
+            <div className="bg-slate-900/80 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden w-full">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
-                      <th className="p-4">Data / Hora</th>
-                      <th className="p-4">Tipo</th>
-                      <th className="p-4">Cód.</th>
-                      <th className="p-4">Produto</th>
-                      <th className="p-4">Setor</th>
-                      <th className="p-4 text-center">Qtd</th>
-                      <th className="p-4">Funcionário</th>
-                      <th className="p-4">Observação</th>
-                      <th className="p-4 text-right">Ação</th>
+                    <tr className="bg-slate-950 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
+                      <th className="p-4.5">Data / Hora</th>
+                      <th className="p-4.5">Tipo</th>
+                      <th className="p-4.5">Cód.</th>
+                      <th className="p-4.5">Produto</th>
+                      <th className="p-4.5">Setor</th>
+                      <th className="p-4.5 text-center">Qtd</th>
+                      <th className="p-4.5">Funcionário</th>
+                      <th className="p-4.5">Observação</th>
+                      <th className="p-4.5 text-right">Ação</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 text-sm">
+                  <tbody className="divide-y divide-slate-800/70 text-sm">
                     {movements.length === 0 ? (
-                      <tr><td colSpan="9" className="p-10 text-center text-slate-500 font-medium">Nenhuma movimentação registada.</td></tr>
+                      <tr><td colSpan="9" className="p-12 text-center text-slate-500 font-medium">Nenhuma movimentação registada.</td></tr>
                     ) : (
                       movements.map(mov => (
                         <tr key={mov.id} className="hover:bg-slate-800/40 transition">
-                          <td className="p-4 text-xs text-slate-400">{new Date(mov.date).toLocaleString('pt-BR')}</td>
-                          <td className="p-4"><span className={`px-3 py-1 rounded-full text-xs font-black tracking-wide ${mov.type === 'Entrada' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'}`}>{mov.type}</span></td>
-                          <td className="p-4 text-xs font-mono font-bold text-slate-400">{mov.productCode || '-'}</td>
-                          <td className="p-4 font-bold text-slate-100">{mov.productName}</td>
-                          <td className="p-4 text-xs font-bold text-slate-300">{mov.sector}</td>
-                          <td className="p-4 text-center font-black text-base text-white">{mov.qty}</td>
-                          <td className="p-4 text-xs font-bold text-amber-400">{mov.employee || '-'}</td>
-                          <td className="p-4 text-xs text-slate-400">{mov.note}</td>
-                          <td className="p-4 text-right"><button onClick={() => handleDeleteMovement(mov)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20 transition">Estornar</button></td>
+                          <td className="p-4.5 text-xs text-slate-400">{new Date(mov.date).toLocaleString('pt-BR')}</td>
+                          <td className="p-4.5"><span className={`px-3 py-1 rounded-full text-xs font-black tracking-wide ${mov.type === 'Entrada' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'}`}>{mov.type}</span></td>
+                          <td className="p-4.5 text-xs font-mono font-bold text-slate-400">{mov.productCode || '-'}</td>
+                          <td className="p-4.5 font-bold text-slate-100">{mov.productName}</td>
+                          <td className="p-4.5 text-xs font-bold text-slate-300">{mov.sector}</td>
+                          <td className="p-4.5 text-center font-black text-base text-white">{mov.qty}</td>
+                          <td className="p-4.5 text-xs font-bold text-amber-400">{mov.employee || '-'}</td>
+                          <td className="p-4.5 text-xs text-slate-400">{mov.note}</td>
+                          <td className="p-4.5 text-right"><button onClick={() => handleDeleteMovement(mov)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20 transition">Estornar</button></td>
                         </tr>
                       ))
                     )}
@@ -755,71 +759,71 @@ export default function App() {
         {/* ABA 3: COMPRAS */}
         {activeTab === 'compras' && (
           <div className="space-y-6 w-full">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800 shadow-lg w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 shadow-xl w-full">
               <div>
                 <h2 className="text-lg font-bold text-white">Central de Suprimentos & Compras</h2>
                 <p className="text-xs text-slate-400">Edite quantidades a comprar ou fornecedores diretamente na tabela a qualquer momento.</p>
               </div>
-              <div className="flex flex-wrap gap-2.5">
-                <select value={purchStatusFilter} onChange={(e) => setPurchStatusFilter(e.target.value)} className="py-2.5 px-4 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200">
+              <div className="flex flex-wrap gap-3">
+                <select value={purchStatusFilter} onChange={(e) => setPurchStatusFilter(e.target.value)} className="py-3 px-4 bg-slate-950 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200">
                   <option value="Todos">Todos os Status</option>
                   <option value="AGUARDANDO">Aguardando Compra</option>
                   <option value="COMPRADO">Comprado / Recebido</option>
                 </select>
-                <button onClick={() => setIsPurchaseModalOpen(true)} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
+                <button onClick={() => setIsPurchaseModalOpen(true)} className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-6 py-3 rounded-xl font-bold text-sm hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/10">
                   + Pedido de Compra
                 </button>
               </div>
             </div>
 
-            <div className="bg-slate-950/60 rounded-2xl shadow-xl border border-slate-800 overflow-hidden w-full">
+            <div className="bg-slate-900/80 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden w-full">
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
-                      <th className="p-4">Data Pedido</th>
-                      <th className="p-4">Setor</th>
-                      <th className="p-4">Cód.</th>
-                      <th className="p-4">Descrição</th>
-                      <th className="p-4 text-center">Qtd a Comprar</th>
-                      <th className="p-4">Fornecedor</th>
-                      <th className="p-4">Data Compra</th>
-                      <th className="p-4 text-center">Qtd Comprada</th>
-                      <th className="p-4 text-center">Status</th>
-                      <th className="p-4 text-right">Ações</th>
+                    <tr className="bg-slate-950 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
+                      <th className="p-4.5">Data Pedido</th>
+                      <th className="p-4.5">Setor</th>
+                      <th className="p-4.5">Cód.</th>
+                      <th className="p-4.5">Descrição</th>
+                      <th className="p-4.5 text-center">Qtd a Comprar</th>
+                      <th className="p-4.5">Fornecedor</th>
+                      <th className="p-4.5">Data Compra</th>
+                      <th className="p-4.5 text-center">Qtd Comprada</th>
+                      <th className="p-4.5 text-center">Status</th>
+                      <th className="p-4.5 text-right">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 text-sm">
+                  <tbody className="divide-y divide-slate-800/70 text-sm">
                     {purchases.filter(p => purchStatusFilter === 'Todos' || p.status === purchStatusFilter).length === 0 ? (
-                      <tr><td colSpan="10" className="p-10 text-center text-slate-500 font-medium">Nenhum pedido de compra registado.</td></tr>
+                      <tr><td colSpan="10" className="p-12 text-center text-slate-500 font-medium">Nenhum pedido de compra registado.</td></tr>
                     ) : (
                       purchases
                         .filter(p => purchStatusFilter === 'Todos' || p.status === purchStatusFilter)
                         .map(purch => (
                           <tr key={purch.id} className="hover:bg-slate-800/40 transition">
-                            <td className="p-4 text-xs text-slate-400">{new Date(purch.orderDate).toLocaleDateString('pt-BR')}</td>
-                            <td className="p-4 text-xs font-bold text-slate-300">{purch.sector}</td>
-                            <td className="p-4 text-xs font-mono text-slate-400">{purch.productCode}</td>
-                            <td className="p-4 font-bold text-slate-100">{purch.productName}</td>
-                            <td className="p-4 text-center">
-                              <input type="number" min="1" key={`qty_${purch.id}_${purch.qtyToBuy}`} defaultValue={purch.qtyToBuy} onBlur={(e) => { const val = Math.max(1, Number(e.target.value) || 1); if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-20 text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-sm font-bold text-amber-400" />
+                            <td className="p-4.5 text-xs text-slate-400">{new Date(purch.orderDate).toLocaleDateString('pt-BR')}</td>
+                            <td className="p-4.5 text-xs font-bold text-slate-300">{purch.sector}</td>
+                            <td className="p-4.5 text-xs font-mono text-slate-400">{purch.productCode}</td>
+                            <td className="p-4.5 font-bold text-slate-100">{purch.productName}</td>
+                            <td className="p-4.5 text-center">
+                              <input type="number" min="1" key={`qty_${purch.id}_${purch.qtyToBuy}`} defaultValue={purch.qtyToBuy} onBlur={(e) => { const val = Math.max(1, Number(e.target.value) || 1); if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-20 text-center bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-2 text-sm font-bold text-amber-400" />
                             </td>
-                            <td className="p-4">
-                              <input type="text" key={`sup_${purch.id}_${purch.supplier}`} defaultValue={purch.supplier === '-' ? '' : purch.supplier} placeholder="Fornecedor..." onBlur={(e) => { const val = e.target.value.trim() || '-'; if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-36 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-slate-200" />
+                            <td className="p-4.5">
+                              <input type="text" key={`sup_${purch.id}_${purch.supplier}`} defaultValue={purch.supplier === '-' ? '' : purch.supplier} placeholder="Fornecedor..." onBlur={(e) => { const val = e.target.value.trim() || '-'; if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-36 bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-slate-200" />
                             </td>
-                            <td className="p-4 text-xs text-slate-400">{purch.purchaseDate ? new Date(purch.purchaseDate).toLocaleDateString('pt-BR') : '-'}</td>
-                            <td className="p-4 text-center font-bold text-emerald-400">
+                            <td className="p-4.5 text-xs text-slate-400">{purch.purchaseDate ? new Date(purch.purchaseDate).toLocaleDateString('pt-BR') : '-'}</td>
+                            <td className="p-4.5 text-center font-bold text-emerald-400">
                               {purch.status === 'COMPRADO' ? (
                                 <div className="flex items-center justify-center gap-2">
                                   <span>{purch.qtyBought}</span>
-                                  <button onClick={() => handleEditBoughtQuantity(purch)} className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-bold border border-slate-700">Alterar</button>
+                                  <button onClick={() => handleEditBoughtQuantity(purch)} className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-bold border border-slate-700">Alterar</button>
                                 </div>
                               ) : '-'}
                             </td>
-                            <td className="p-4 text-center">
+                            <td className="p-4.5 text-center">
                               {purch.status === 'COMPRADO' ? <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-black">COMPRADO</span> : <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-black">AGUARDANDO</span>}
                             </td>
-                            <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                            <td className="p-4.5 text-right space-x-2 whitespace-nowrap">
                               {purch.status === 'AGUARDANDO' && <button onClick={() => handleConfirmPurchaseReceived(purch)} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-500 shadow-md">Confirmar</button>}
                               <button onClick={() => handleDeletePurchase(purch.id)} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-500/20">Excluir</button>
                             </td>
@@ -836,18 +840,18 @@ export default function App() {
         {/* ABA 4: FUNCIONÁRIOS */}
         {activeTab === 'funcionarios' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-5">
+            <div className="bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-5">
               <div>
                 <h2 className="text-lg font-bold text-white">Equipa ({employees.length})</h2>
                 <p className="text-xs text-slate-400">Gestão de colaboradores para registo de EPIs.</p>
               </div>
 
               <form onSubmit={handleAddEmployee} className="flex gap-2">
-                <input type="text" placeholder="Nome do funcionário..." value={newEmployeeName} onChange={(e) => setNewEmployeeName(e.target.value)} className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-                <button type="submit" className="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-black hover:bg-amber-400 transition whitespace-nowrap">+ Adicionar</button>
+                <input type="text" placeholder="Nome do funcionário..." value={newEmployeeName} onChange={(e) => setNewEmployeeName(e.target.value)} className="flex-1 px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+                <button type="submit" className="bg-amber-500 text-slate-950 px-5 py-3 rounded-xl text-xs font-black hover:bg-amber-400 transition whitespace-nowrap">+ Adicionar</button>
               </form>
 
-              <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-800 border border-slate-800 rounded-xl bg-slate-900/40">
+              <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-800 border border-slate-800 rounded-xl bg-slate-950/40">
                 {employees.map(emp => (
                   <div key={emp.id} className="p-3.5 flex justify-between items-center hover:bg-slate-800/40 gap-2">
                     <button onClick={() => setSelectedEmpForHistory(emp.name)} className={`text-xs font-bold text-left flex-1 tracking-wide ${selectedEmpForHistory === emp.name ? 'text-amber-400 underline font-black' : 'text-slate-200'}`}>{emp.name}</button>
@@ -857,13 +861,13 @@ export default function App() {
               </div>
             </div>
 
-            <div className="lg:col-span-2 bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-4">
+            <div className="lg:col-span-2 bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-white">Histórico de EPIs e Retiradas</h3>
                   <p className="text-xs text-slate-400">Selecione o colaborador para auditar o consumo.</p>
                 </div>
-                <select value={selectedEmpForHistory} onChange={(e) => setSelectedEmpForHistory(e.target.value)} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
+                <select value={selectedEmpForHistory} onChange={(e) => setSelectedEmpForHistory(e.target.value)} className="p-3 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                   <option value="Todos">Todos os Funcionários</option>
                   {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
                 </select>
@@ -872,14 +876,14 @@ export default function App() {
               <div className="overflow-x-auto w-full">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
-                      <th className="p-3">Data</th>
-                      <th className="p-3">Funcionário</th>
-                      <th className="p-3">Cód.</th>
-                      <th className="p-3">Produto / EPI</th>
-                      <th className="p-3">Setor</th>
-                      <th className="p-3 text-center">Qtd</th>
-                      <th className="p-3">Observação</th>
+                    <tr className="bg-slate-950 text-slate-400 border-b border-slate-800 text-xs uppercase tracking-wider font-extrabold">
+                      <th className="p-3.5">Data</th>
+                      <th className="p-3.5">Funcionário</th>
+                      <th className="p-3.5">Cód.</th>
+                      <th className="p-3.5">Produto / EPI</th>
+                      <th className="p-3.5">Setor</th>
+                      <th className="p-3.5 text-center">Qtd</th>
+                      <th className="p-3.5">Observação</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
@@ -887,13 +891,13 @@ export default function App() {
                       .filter(m => m.type === 'Saída' && m.employee && m.employee !== '-' && (selectedEmpForHistory === 'Todos' || m.employee === selectedEmpForHistory))
                       .map(m => (
                         <tr key={m.id} className="hover:bg-slate-800/40">
-                          <td className="p-3 text-xs text-slate-400">{new Date(m.date).toLocaleString('pt-BR')}</td>
-                          <td className="p-3 font-bold text-amber-400 text-xs">{m.employee}</td>
-                          <td className="p-3 text-xs text-slate-400 font-mono">{m.productCode || '-'}</td>
-                          <td className="p-3 font-bold text-slate-100">{m.productName}</td>
-                          <td className="p-3 text-xs text-slate-300">{m.sector}</td>
-                          <td className="p-3 text-center font-black text-amber-400">-{m.qty}</td>
-                          <td className="p-3 text-xs text-slate-400">{m.note}</td>
+                          <td className="p-3.5 text-xs text-slate-400">{new Date(m.date).toLocaleString('pt-BR')}</td>
+                          <td className="p-3.5 font-bold text-amber-400 text-xs">{m.employee}</td>
+                          <td className="p-3.5 text-xs text-slate-400 font-mono">{m.productCode || '-'}</td>
+                          <td className="p-3.5 font-bold text-slate-100">{m.productName}</td>
+                          <td className="p-3.5 text-xs text-slate-300">{m.sector}</td>
+                          <td className="p-3.5 text-center font-black text-amber-400">-{m.qty}</td>
+                          <td className="p-3.5 text-xs text-slate-400">{m.note}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -906,7 +910,7 @@ export default function App() {
         {/* ABA 5: RESUMO E RELATÓRIOS */}
         {activeTab === 'resumo' && (
           <div className="space-y-6 w-full">
-            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 flex flex-wrap gap-5 items-center justify-between w-full">
+            <div className="bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-slate-800 flex flex-wrap gap-5 items-center justify-between w-full">
               <div>
                 <h3 className="text-lg font-bold text-white">Filtros de Relatórios e Auditoria</h3>
                 <p className="text-xs text-slate-400">Analise por setor, mês específico ou janela de até 1 ano.</p>
@@ -915,7 +919,7 @@ export default function App() {
               <div className="flex flex-wrap gap-3 items-center">
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Setor</label>
-                  <select value={summarySector} onChange={(e) => setSummarySector(e.target.value)} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
+                  <select value={summarySector} onChange={(e) => setSummarySector(e.target.value)} className="p-3 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                     <option value="Todos">Todos os Setores</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -923,7 +927,7 @@ export default function App() {
 
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Período Recente</label>
-                  <select value={summaryPeriodMonths} onChange={(e) => { setSummaryPeriodMonths(e.target.value); setSummaryMonth('Todos'); }} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
+                  <select value={summaryPeriodMonths} onChange={(e) => { setSummaryPeriodMonths(e.target.value); setSummaryMonth('Todos'); }} className="p-3 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                     <option value="1">Último Mês (30 dias)</option>
                     <option value="3">Últimos 3 Meses</option>
                     <option value="6">Últimos 6 Meses</option>
@@ -933,7 +937,7 @@ export default function App() {
 
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Mês Específico</label>
-                  <select value={summaryMonth} onChange={(e) => setSummaryMonth(e.target.value)} className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
+                  <select value={summaryMonth} onChange={(e) => setSummaryMonth(e.target.value)} className="p-3 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-slate-200">
                     <option value="Todos">Todos os meses</option>
                     {availableMonths.map(m => (
                       <option key={m} value={m}>{m.split('-').reverse().join('/')}</option>
@@ -944,7 +948,7 @@ export default function App() {
             </div>
 
             {/* ALERTA ESTOQUE MÍNIMO */}
-            <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-rose-500/30 space-y-4 w-full">
+            <div className="bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-rose-500/30 space-y-4 w-full">
               <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                 <div>
                   <h3 className="text-lg font-black text-rose-400 flex items-center gap-2.5">
@@ -958,27 +962,27 @@ export default function App() {
               {lowStockProducts.length === 0 ? (
                 <p className="text-sm text-emerald-400 font-bold py-6 text-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl">Nenhum produto abaixo do estoque mínimo no filtro atual.</p>
               ) : (
-                <div className="overflow-x-auto max-h-72 overflow-y-auto border border-slate-800 rounded-xl bg-slate-900/40 w-full">
+                <div className="overflow-x-auto max-h-72 overflow-y-auto border border-slate-800 rounded-xl bg-slate-950/40 w-full">
                   <table className="w-full text-left text-sm">
                     <thead>
-                      <tr className="bg-slate-900 text-slate-400 text-xs uppercase font-extrabold sticky top-0">
-                        <th className="p-3">Código</th>
-                        <th className="p-3">Produto</th>
-                        <th className="p-3">Setor</th>
-                        <th className="p-3 text-center">Estoque Atual</th>
-                        <th className="p-3 text-center">Estoque Mínimo</th>
-                        <th className="p-3 text-right">Ação</th>
+                      <tr className="bg-slate-950 text-slate-400 text-xs uppercase font-extrabold sticky top-0">
+                        <th className="p-3.5">Código</th>
+                        <th className="p-3.5">Produto</th>
+                        <th className="p-3.5">Setor</th>
+                        <th className="p-3.5 text-center">Estoque Atual</th>
+                        <th className="p-3.5 text-center">Estoque Mínimo</th>
+                        <th className="p-3.5 text-right">Ação</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {lowStockProducts.map(p => (
                         <tr key={p.id} className="hover:bg-rose-500/5">
-                          <td className="p-3 text-xs font-mono font-bold text-slate-400">{p.code || '-'}</td>
-                          <td className="p-3 font-bold text-slate-100">{p.name}</td>
-                          <td className="p-3 text-xs font-bold text-slate-300">{p.sector}</td>
-                          <td className="p-3 text-center font-black text-rose-400">{p.stock}</td>
-                          <td className="p-3 text-center font-bold text-slate-400">{p.minStock}</td>
-                          <td className="p-3 text-right"><button onClick={() => sendProductToPurchases(p)} className="px-3 py-1 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold hover:bg-amber-400 shadow">Comprar</button></td>
+                          <td className="p-3.5 text-xs font-mono font-bold text-slate-400">{p.code || '-'}</td>
+                          <td className="p-3.5 font-bold text-slate-100">{p.name}</td>
+                          <td className="p-3.5 text-xs font-bold text-slate-300">{p.sector}</td>
+                          <td className="p-3.5 text-center font-black text-rose-400">{p.stock}</td>
+                          <td className="p-3.5 text-center font-bold text-slate-400">{p.minStock}</td>
+                          <td className="p-3.5 text-right"><button onClick={() => sendProductToPurchases(p)} className="px-3 py-1 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold hover:bg-amber-400 shadow">Comprar</button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -989,14 +993,14 @@ export default function App() {
 
             {/* TOTAIS ENTRADAS E SAÍDAS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-              <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
+              <div className="bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
                 <h4 className="font-extrabold text-white border-b border-slate-800 pb-2 flex justify-between">
                   <span>Total de Entradas</span>
                   <span className="text-emerald-400 font-black">{filteredMovementsForSummary.filter(m => m.type === 'Entrada').reduce((acc, m) => acc + m.qty, 0)} un.</span>
                 </h4>
                 <p className="text-xs text-slate-400">Volume reposto no período selecionado.</p>
               </div>
-              <div className="bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
+              <div className="bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-slate-800 space-y-2">
                 <h4 className="font-extrabold text-white border-b border-slate-800 pb-2 flex justify-between">
                   <span>Total de Saídas / EPIs</span>
                   <span className="text-amber-400 font-black">{filteredMovementsForSummary.filter(m => m.type === 'Saída').reduce((acc, m) => acc + m.qty, 0)} un.</span>
@@ -1005,16 +1009,16 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/60 p-6 rounded-2xl shadow-xl border border-slate-800 w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/80 p-6 rounded-2xl shadow-xl border border-slate-800 w-full">
               <div>
                 <h2 className="text-lg font-bold text-white">Exportação Executiva</h2>
                 <p className="text-xs text-slate-400">Gere relatórios oficiais em Excel ou PDF para auditoria.</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={exportCSV} className="bg-amber-500 text-slate-950 px-5 py-3 rounded-xl font-bold hover:bg-amber-400 transition shadow-lg shadow-amber-500/10 text-sm">
+                <button onClick={exportCSV} className="bg-amber-500 text-slate-950 px-6 py-3 rounded-xl font-bold hover:bg-amber-400 transition shadow-lg shadow-amber-500/10 text-sm">
                   Baixar Excel (.CSV)
                 </button>
-                <button onClick={() => window.print()} className="bg-slate-800 text-white border border-slate-700 px-5 py-3 rounded-xl font-semibold hover:bg-slate-700 transition shadow text-sm">
+                <button onClick={() => window.print()} className="bg-slate-800 text-white border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-700 transition shadow text-sm">
                   Imprimir / Salvar PDF
                 </button>
               </div>
