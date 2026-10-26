@@ -376,7 +376,7 @@ export default function App() {
     await batch.commit();
   };
 
-  // --- FUNÇÕES DA ABA DE COMPRAS ---
+  // --- FUNÇÕES DA ABA DE COMPRAS (COM EDIÇÃO DE QUANTIDADE A QUALQUER MOMENTO) ---
   const purchFilteredProducts = products.filter(p => {
     const matchSector = purchSectorFilter === 'Todos' || p.sector === purchSectorFilter;
     const q = purchSearchQuery.toLowerCase().trim();
@@ -412,6 +412,67 @@ export default function App() {
     setPurchSearchQuery('');
   };
 
+  // Permite alterar Qtd a Comprar ou Fornecedor direto na tabela, mesmo depois de lançado o pedido
+  const handleUpdatePurchaseField = async (purch, field, value) => {
+    try {
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
+        ...purch,
+        [field]: value
+      }, { merge: true });
+    } catch (err) {
+      console.error("Erro ao atualizar pedido de compra:", err);
+    }
+  };
+
+  // Permite corrigir/alterar a quantidade comprada mesmo após já ter sido confirmada, ajustando o estoque automaticamente
+  const handleEditBoughtQuantity = async (purch) => {
+    const inputQty = prompt(
+      `Alterar quantidade comprada de "${purch.productName}".\n(O saldo do estoque será ajustado automaticamente com a diferença):`,
+      purch.qtyBought || purch.qtyToBuy
+    );
+    if (inputQty === null) return;
+    const newQtyBought = Number(inputQty);
+    if (isNaN(newQtyBought) || newQtyBought <= 0) {
+      alert("Informe uma quantidade válida maior que zero.");
+      return;
+    }
+
+    const oldQtyBought = Number(purch.qtyBought) || 0;
+    const diff = newQtyBought - oldQtyBought;
+    if (diff === 0) return;
+
+    const product = products.find(p => p.id === purch.productId);
+    const batch = writeBatch(db);
+    const nowIso = new Date().toISOString();
+
+    // 1. Atualiza a nova quantidade no pedido de compra
+    batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
+      qtyBought: newQtyBought,
+      updatedAt: nowIso
+    });
+
+    // 2. Ajusta o estoque do produto com a diferença
+    if (product) {
+      batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), {
+        stock: Math.max(0, (Number(product.stock) || 0) + diff),
+        updatedAt: nowIso
+      });
+    }
+
+    // 3. Atualiza a movimentação correspondente (se existir)
+    if (purch.movementId) {
+      const movExists = movements.some(m => m.id === purch.movementId);
+      if (movExists) {
+        batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'movements', purch.movementId), {
+          qty: newQtyBought,
+          note: `Entrada Automática de Compra (Qtd ajustada para ${newQtyBought} - Fornecedor: ${purch.supplier || '-'})`
+        });
+      }
+    }
+
+    await batch.commit();
+  };
+
   const handleConfirmPurchaseReceived = async (purch) => {
     const inputQty = prompt(`Confirmar recebimento de "${purch.productName}".\nQuantidade comprada que entrará no estoque:`, purch.qtyToBuy);
     if (inputQty === null) return;
@@ -424,12 +485,14 @@ export default function App() {
     const product = products.find(p => p.id === purch.productId);
     const batch = writeBatch(db);
     const nowIso = new Date().toISOString();
+    const movId = 'mov_purch_' + Date.now();
 
     // 1. Atualiza o pedido na aba Compras para COMPRADO
     batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', purch.id), {
       status: 'COMPRADO',
       qtyBought: qtyBought,
-      purchaseDate: nowIso
+      purchaseDate: nowIso,
+      movementId: movId
     });
 
     // 2. Soma automaticamente no estoque do produto
@@ -441,7 +504,6 @@ export default function App() {
     }
 
     // 3. Lança entrada automática na Movimentação
-    const movId = 'mov_purch_' + Date.now();
     batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'movements', movId), {
       productId: purch.productId,
       productCode: purch.productCode || '-',
@@ -466,21 +528,25 @@ export default function App() {
 
   const sendProductToPurchases = async (prod) => {
     const suggestedQty = Math.max(1, (prod.minStock || 5) - (prod.stock || 0));
+    const inputQty = prompt(`Adicionar "${prod.name}" à lista de compras.\nQual a quantidade a comprar? (Você também poderá alterar depois na aba Compras):`, suggestedQty);
+    if (inputQty === null) return;
+    const finalQty = Math.max(1, Number(inputQty) || suggestedQty);
+
     const pId = 'purch_' + Date.now();
     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'purchases', pId), {
       productId: prod.id,
       productCode: prod.code || '-',
       productName: prod.name,
       sector: prod.sector,
-      qtyToBuy: suggestedQty,
+      qtyToBuy: finalQty,
       supplier: '-',
       orderDate: new Date().toISOString(),
       purchaseDate: null,
       qtyBought: 0,
       status: 'AGUARDANDO',
-      note: 'Gerado por alerta de reposição'
+      note: 'Gerado a partir da aba de Estoque'
     });
-    alert(`"${prod.name}" enviado para a aba COMPRAS!`);
+    alert(`"${prod.name}" (${finalQty} un.) foi adicionado à aba COMPRAS!`);
   };
 
   // --- FUNÇÕES DE FUNCIONÁRIOS ---
@@ -671,6 +737,7 @@ export default function App() {
                             <td className="p-4 text-center">
                               <input 
                                 type="number" 
+                                key={`min_${prod.id}_${prod.minStock}`}
                                 defaultValue={prod.minStock} 
                                 onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)}
                                 className="w-16 text-center bg-gray-50 border border-gray-200 rounded-lg py-1 text-xs font-semibold"
@@ -762,13 +829,15 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 3: COMPRAS (IGUAL À PLANILHA) */}
+        {/* ABA 3: COMPRAS (COM QUANTIDADE EDITÁVEL A QUALQUER MOMENTO) */}
         {activeTab === 'compras' && (
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-[#C5A880]/20">
               <div>
                 <h2 className="text-lg font-bold text-[#2D1B12]">Gestão de Compras e Reposição</h2>
-                <p className="text-xs text-gray-500">Liste o que precisa comprar. Ao clicar em "Confirmar Compra", a quantidade entra automaticamente no estoque!</p>
+                <p className="text-xs text-gray-500">
+                  Você pode alterar a <strong>Qtd a Comprar</strong> ou o <strong>Fornecedor</strong> clicando direto nos campos abaixo, mesmo após já ter feito o pedido!
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <select 
@@ -798,8 +867,8 @@ export default function App() {
                       <th className="p-4">Setor</th>
                       <th className="p-4">Cód.</th>
                       <th className="p-4">Descrição</th>
-                      <th className="p-4 text-center">Qtd a Comprar</th>
-                      <th className="p-4">Fornecedor</th>
+                      <th className="p-4 text-center">Qtd a Comprar (Editável)</th>
+                      <th className="p-4">Fornecedor (Editável)</th>
                       <th className="p-4">Data Compra</th>
                       <th className="p-4 text-center">Qtd Comprada</th>
                       <th className="p-4 text-center">Status</th>
@@ -818,10 +887,56 @@ export default function App() {
                             <td className="p-4 text-xs font-bold">{purch.sector}</td>
                             <td className="p-4 text-xs font-bold text-gray-500">{purch.productCode}</td>
                             <td className="p-4 font-semibold text-[#2D1B12]">{purch.productName}</td>
-                            <td className="p-4 text-center font-bold">{purch.qtyToBuy}</td>
-                            <td className="p-4 text-xs text-gray-600">{purch.supplier}</td>
+                            <td className="p-4 text-center">
+                              <input 
+                                type="number" 
+                                min="1"
+                                key={`qty_${purch.id}_${purch.qtyToBuy}`}
+                                defaultValue={purch.qtyToBuy}
+                                onBlur={(e) => {
+                                  const val = Math.max(1, Number(e.target.value) || 1);
+                                  if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') e.target.blur();
+                                }}
+                                title="Clique para alterar a quantidade a comprar"
+                                className="w-20 text-center bg-[#FDFBF7] border border-[#C5A880]/60 rounded-lg py-1.5 px-2 text-sm font-bold text-[#2D1B12] focus:outline-none focus:ring-2 focus:ring-[#C5A880]"
+                              />
+                            </td>
+                            <td className="p-4">
+                              <input 
+                                type="text" 
+                                key={`sup_${purch.id}_${purch.supplier}`}
+                                defaultValue={purch.supplier === '-' ? '' : purch.supplier}
+                                placeholder="Adicionar fornecedor..."
+                                onBlur={(e) => {
+                                  const val = e.target.value.trim() || '-';
+                                  if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') e.target.blur();
+                                }}
+                                className="w-36 bg-[#FDFBF7] border border-gray-200 rounded-lg py-1 px-2 text-xs text-gray-700 focus:outline-none focus:border-[#C5A880]"
+                              />
+                            </td>
                             <td className="p-4 text-xs text-gray-500">{purch.purchaseDate ? new Date(purch.purchaseDate).toLocaleDateString('pt-BR') : '-'}</td>
-                            <td className="p-4 text-center font-bold text-green-700">{purch.qtyBought || '-'}</td>
+                            <td className="p-4 text-center font-bold text-green-700">
+                              {purch.status === 'COMPRADO' ? (
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span>{purch.qtyBought}</span>
+                                  <button 
+                                    onClick={() => handleEditBoughtQuantity(purch)}
+                                    title="Alterar quantidade comprada e ajustar estoque"
+                                    className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[#2D1B12] rounded text-[11px] font-semibold border border-gray-300"
+                                  >
+                                    Alterar Qtd
+                                  </button>
+                                </div>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
                             <td className="p-4 text-center">
                               {purch.status === 'COMPRADO' ? (
                                 <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">COMPRADO</span>
