@@ -19,51 +19,22 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = "personaliza-estoque-v4";
 
-// Lista oficial de 38 funcionários enviada na imagem
 const INITIAL_EMPLOYEES = [
-  "ADRIANO SANTIAGO MENDONCA",
-  "ALINE",
-  "ALINE DO VALE SOARES",
-  "ANTONIO JOSE DA SILVA",
-  "ARTHUR GOUVEA",
-  "CARLOS ANTONIO DE ALMEIDA SILVA",
-  "CARLOS EDUARDO",
-  "CHAENE ARAUJO",
-  "CLAUDINEI SILVA NASCIMENTO",
-  "CRISTOVAO VITORINO",
-  "EDVALDO GONCALVES DE SOUZA",
-  "GABRIEL NOGUEIRA DOS SANTOS",
-  "GABRIELLE CRISTINE MARCELINO DE SOUZA",
-  "GLAUCIA FERNANDA DE FREITAS MAGALHAES",
-  "HIGOR LIMA COLOMBO",
-  "IGO FRANCISCO",
-  "IGOR DA SILVA COSTA",
-  "IGOR REIS",
-  "JOSE MARIA DE SOUZA",
-  "JUAREZ DA SILVA REIS",
-  "JOAO ENES",
-  "LAZARO",
-  "LEONARDO FARIAS EMILIANO",
-  "MARIA LUIZA DE OLIVEIRA",
-  "MATEUS HENRIQUE",
-  "MAURO LUCIO SALES REIFF",
-  "MICKAEL",
-  "NEY ANGELO DA SILVA NASCIMENTO",
-  "NICOLAS COSTA",
-  "NINA",
-  "PEDRO HENRIQUE DOS PASSOS SILVA",
-  "PEDRO HENRIQUE SIMOES",
-  "PETERSON SILVA NASCIMENTO",
-  "RAUL LUIZ VIEIRA",
-  "ROBERTO CARLOS DE AZEVEDO",
-  "RONALDO DA SILVA SANTOS",
-  "SEBASTIAO CARLOS FELICIANO DE MELO",
-  "WALLACE WANDER"
+  "ADRIANO SANTIAGO MENDONCA", "ALINE", "ALINE DO VALE SOARES", "ANTONIO JOSE DA SILVA",
+  "ARTHUR GOUVEA", "CARLOS ANTONIO DE ALMEIDA SILVA", "CARLOS EDUARDO", "CHAENE ARAUJO",
+  "CLAUDINEI SILVA NASCIMENTO", "CRISTOVAO VITORINO", "EDVALDO GONCALVES DE SOUZA",
+  "GABRIEL NOGUEIRA DOS SANTOS", "GABRIELLE CRISTINE MARCELINO DE SOUZA",
+  "GLAUCIA FERNANDA DE FREITAS MAGALHAES", "HIGOR LIMA COLOMBO", "IGO FRANCISCO",
+  "IGOR DA SILVA COSTA", "IGOR REIS", "JOSE MARIA DE SOUZA", "JUAREZ DA SILVA REIS",
+  "JOAO ENES", "LAZARO", "LEONARDO FARIAS EMILIANO", "MARIA LUIZA DE OLIVEIRA",
+  "MATEUS HENRIQUE", "MAURO LUCIO SALES REIFF", "MICKAEL", "NEY ANGELO DA SILVA NASCIMENTO",
+  "NICOLAS COSTA", "NINA", "PEDRO HENRIQUE DOS PASSOS SILVA", "PEDRO HENRIQUE SIMOES",
+  "PETERSON SILVA NASCIMENTO", "RAUL LUIZ VIEIRA", "ROBERTO CARLOS DE AZEVEDO",
+  "RONALDO DA SILVA SANTOS", "SEBASTIAO CARLOS FELICIANO DE MELO", "WALLACE WANDER"
 ];
 
 const SECTORS = ["SUBLIMAÇÃO", "MARCENARIA", "VIDRAÇARIA", "EPI"];
 
-// [código, nome, setor, unidade, estoqueInicial, estoqueMinimo] - 320 produtos da planilha
 const RAW_PRODUCTS = [
   ["56", "ADESIVO INST 100 G TEK BONB", "SUBLIMAÇÃO", "UN", 0.0, 5], ["84", "ASTE ABRE FACIL", "SUBLIMAÇÃO", "UN", 0.0, 5], ["60", "BOBINA DE PAPEL SEDA 1600X600 40 GRS", "SUBLIMAÇÃO", "UN", 0.0, 5], ["61", "BOBINA DE PAPEL TRATADO 1600X600 60GRS", "SUBLIMAÇÃO", "UN", 0.0, 5],
   ["102", "BOTÃO PARA JALECO TAM 28", "SUBLIMAÇÃO", "UN", 0.0, 5], ["10", "CARTUCHO DE LIMPEZA", "SUBLIMAÇÃO", "UN", 0.0, 5], ["103", "CORDÃO ELLO PARA BOLSINHA", "SUBLIMAÇÃO", "UN", 0.0, 5], ["83", "ELASTICO", "SUBLIMAÇÃO", "UN", 0.0, 5],
@@ -172,7 +143,7 @@ export default function App() {
   const [formMinStock, setFormMinStock] = useState('5');
   const [formInitialStock, setFormInitialStock] = useState('0');
 
-  // Modal e Pesquisa de Movimentação (Por Setor, Código e Nome)
+  // Modal e Pesquisa de Movimentação
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [moveType, setMoveType] = useState('Entrada');
   const [moveSectorFilter, setMoveSectorFilter] = useState('Todos');
@@ -189,12 +160,16 @@ export default function App() {
   const [purchProductId, setPurchProductId] = useState('');
   const [purchQtyToBuy, setPurchQtyToBuy] = useState('5');
   const [purchSupplier, setPurchSupplier] = useState('');
-  const [purchNote, setPurchNote] = useState('');
   const [purchStatusFilter, setPurchStatusFilter] = useState('Todos');
 
   // Gestão de Funcionários
   const [newEmployeeName, setNewEmployeeName] = useState('');
   const [selectedEmpForHistory, setSelectedEmpForHistory] = useState('Todos');
+
+  // Filtros da Aba de Resumo (Setor, Mês Específico, Período de Meses até 1 Ano)
+  const [summarySector, setSummarySector] = useState('Todos');
+  const [summaryMonth, setSummaryMonth] = useState('Todos'); // 'YYYY-MM' ou 'Todos'
+  const [summaryPeriodMonths, setSummaryPeriodMonths] = useState('12'); // '1', '3', '6', '12'
 
   useEffect(() => {
     signInAnonymously(auth).catch((err) => console.error("Erro Auth:", err));
@@ -207,7 +182,7 @@ export default function App() {
     const prodRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
     const empRef = collection(db, 'artifacts', appId, 'public', 'data', 'employees');
 
-    // Popular 320 produtos se ainda não tiver os 320 completos
+    // Popular 320 produtos se necessário
     getDocs(prodRef).then(async (snapshot) => {
       if (snapshot.size < 320) {
         const batch = writeBatch(db);
@@ -229,21 +204,19 @@ export default function App() {
       }
     }).catch(err => console.error("Erro seed produtos:", err));
 
-    // Sincronizar a nova lista oficial de 38 funcionários (substituindo os antigos genéricos se existirem)
+    // Sincronizar a lista exata de 38 funcionários da imagem
     getDocs(empRef).then(async (snapshot) => {
       const existingNames = snapshot.docs.map(d => d.data().name);
       const hasNewList = existingNames.includes("ADRIANO SANTIAGO MENDONCA");
       if (snapshot.empty || !hasNewList) {
         const batch = writeBatch(db);
-        // Remove apenas os registos antigos de inicialização (`emp_init_...`) para limpar os nomes antigos
         snapshot.docs.forEach(d => {
-          if (d.id.startsWith('emp_init_')) {
+          if (d.id.startsWith('emp_init_') || d.id.startsWith('emp_real_')) {
             batch.delete(d.ref);
           }
         });
-        // Insere os 38 funcionários reais da imagem
         INITIAL_EMPLOYEES.forEach((empName, idx) => {
-          const eId = 'emp_real_' + idx;
+          const eId = 'emp_img_' + idx;
           batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', eId), {
             name: empName,
             createdAt: new Date().toISOString()
@@ -348,7 +321,7 @@ export default function App() {
     }, { merge: true });
   };
 
-  // --- FUNÇÕES DE MOVIMENTAÇÃO (COM FILTRO DE CÓDIGO, NOME E SETOR) ---
+  // --- MOVIMENTAÇÃO ---
   const moveFilteredProducts = products.filter(p => {
     const matchSector = moveSectorFilter === 'Todos' || p.sector === moveSectorFilter;
     const q = moveSearchQuery.toLowerCase().trim();
@@ -419,7 +392,7 @@ export default function App() {
     await batch.commit();
   };
 
-  // --- FUNÇÕES DA ABA DE COMPRAS (COM EDIÇÃO DE QUANTIDADE A QUALQUER MOMENTO) ---
+  // --- COMPRAS ---
   const purchFilteredProducts = products.filter(p => {
     const matchSector = purchSectorFilter === 'Todos' || p.sector === purchSectorFilter;
     const q = purchSearchQuery.toLowerCase().trim();
@@ -462,7 +435,7 @@ export default function App() {
         [field]: value
       }, { merge: true });
     } catch (err) {
-      console.error("Erro ao atualizar pedido de compra:", err);
+      console.error("Erro ao atualizar pedido:", err);
     }
   };
 
@@ -563,7 +536,7 @@ export default function App() {
 
   const sendProductToPurchases = async (prod) => {
     const suggestedQty = Math.max(1, (prod.minStock || 5) - (prod.stock || 0));
-    const inputQty = prompt(`Adicionar "${prod.name}" à lista de compras.\nQual a quantidade a comprar? (Você também poderá alterar depois na aba Compras):`, suggestedQty);
+    const inputQty = prompt(`Adicionar "${prod.name}" à lista de compras.\nQual a quantidade a comprar?:`, suggestedQty);
     if (inputQty === null) return;
     const finalQty = Math.max(1, Number(inputQty) || suggestedQty);
 
@@ -584,7 +557,7 @@ export default function App() {
     alert(`"${prod.name}" (${finalQty} un.) foi adicionado à aba COMPRAS!`);
   };
 
-  // --- FUNÇÕES DE FUNCIONÁRIOS (ADICIONAR E EXCLUIR) ---
+  // --- FUNCIONÁRIOS ---
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     if (!newEmployeeName.trim()) return;
@@ -629,12 +602,48 @@ export default function App() {
     link.click();
   };
 
+  // --- LÓGICA DE FILTRAGEM DA ABA RESUMO (SECTOR, MONTH, PERIOD MONTHS) ---
   const filteredProducts = products.filter(p => {
     const q = searchTerm.toLowerCase().trim();
     const matchNameOrCode = !q || p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase().includes(q);
     const matchSector = filterSector === 'Todos' || p.sector === filterSector;
     const matchClass = filterClassification === 'Todas' || (p.classification || 'Matéria Prima') === filterClassification;
     return matchNameOrCode && matchSector && matchClass;
+  });
+
+  // Lista de meses disponíveis nas movimentações (formato 'YYYY-MM')
+  const availableMonths = Array.from(new Set(movements.map(m => {
+    if (!m.date) return null;
+    return m.date.slice(0, 7);
+  }))).filter(Boolean).sort().reverse();
+
+  // Filtrar movimentos para a aba de resumo com base em Setor, Mês Específico e Período (até 1 ano)
+  const filteredMovementsForSummary = movements.filter(m => {
+    // Filtro de Setor
+    if (summarySector !== 'Todos' && m.sector !== summarySector) return false;
+
+    if (!m.date) return false;
+    const movDate = new Date(m.date);
+
+    // Filtro de Mês Específico
+    if (summaryMonth !== 'Todos') {
+      const movMonthStr = m.date.slice(0, 7);
+      if (movMonthStr !== summaryMonth) return false;
+    } else {
+      // Filtro de Período em Meses (1 a 12 meses / 1 ano)
+      const monthsLimit = Number(summaryPeriodMonths) || 12;
+      const now = new Date();
+      const cutoffDate = new Date(now.getFullYear(), now.getMonth() - monthsLimit, 1);
+      if (movDate < cutoffDate) return false;
+    }
+
+    return true;
+  });
+
+  // Produtos com Estoque Mínimo (com base no filtro de setor da aba Resumo, se houver)
+  const lowStockProducts = products.filter(p => {
+    if (summarySector !== 'Todos' && p.sector !== summarySector) return false;
+    return (p.stock || 0) <= (p.minStock || 5);
   });
 
   const pendingPurchasesCount = purchases.filter(p => p.status === 'AGUARDANDO').length;
@@ -644,7 +653,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#2D1B12] text-[#FDFBF7] flex flex-col items-center justify-center font-sans">
         <div className="w-12 h-12 border-4 border-[#C5A880] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-xl tracking-wide font-medium text-[#C5A880]">Personaliza - Sincronizando Produtos e Funcionários...</p>
+        <p className="text-xl tracking-wide font-medium text-[#C5A880]">Personaliza - Sincronizando Dados e Relatórios...</p>
       </div>
     );
   }
@@ -677,7 +686,7 @@ export default function App() {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
-        {/* ABA 1: ESTOQUE POR SETOR */}
+        {/* ABA 1: ESTOQUE */}
         {activeTab === 'estoque' && (
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
@@ -746,7 +755,7 @@ export default function App() {
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-sm">
                     {filteredProducts.length === 0 ? (
-                      <tr><td colSpan="9" className="p-8 text-center text-gray-400">Nenhum produto encontrado para este filtro.</td></tr>
+                      <tr><td colSpan="9" className="p-8 text-center text-gray-400">Nenhum produto encontrado.</td></tr>
                     ) : (
                       filteredProducts.map(prod => {
                         const isLow = prod.stock <= prod.minStock;
@@ -754,39 +763,23 @@ export default function App() {
                           <tr key={prod.id} className="hover:bg-[#FDFBF7]/80 transition">
                             <td className="p-4 text-xs font-bold text-[#2D1B12] bg-gray-50/50">{prod.code || '-'}</td>
                             <td className="p-4 font-semibold text-[#2D1B12]">{prod.name}</td>
-                            <td className="p-4">
-                              <span className="bg-[#C5A880]/20 text-[#2D1B12] px-2.5 py-1 rounded-lg text-xs font-bold">{prod.sector}</span>
-                            </td>
+                            <td className="p-4"><span className="bg-[#C5A880]/20 text-[#2D1B12] px-2.5 py-1 rounded-lg text-xs font-bold">{prod.sector}</span></td>
                             <td className="p-4 text-xs text-gray-500 font-bold">{prod.unit || 'UN'}</td>
                             <td className="p-4">
-                              <select 
-                                value={prod.classification || 'Matéria Prima'} 
-                                onChange={(e) => handleUpdateField(prod, 'classification', e.target.value)}
-                                className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs font-medium"
-                              >
+                              <select value={prod.classification || 'Matéria Prima'} onChange={(e) => handleUpdateField(prod, 'classification', e.target.value)} className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs font-medium">
                                 <option value="Matéria Prima">Matéria Prima</option>
                                 <option value="Consumo">Consumo</option>
                               </select>
                             </td>
                             <td className="p-4 text-center font-bold text-base">{prod.stock}</td>
                             <td className="p-4 text-center">
-                              <input 
-                                type="number" 
-                                key={`min_${prod.id}_${prod.minStock}`}
-                                defaultValue={prod.minStock} 
-                                onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)}
-                                className="w-16 text-center bg-gray-50 border border-gray-200 rounded-lg py-1 text-xs font-semibold"
-                              />
+                              <input type="number" key={`min_${prod.id}_${prod.minStock}`} defaultValue={prod.minStock} onBlur={(e) => handleUpdateField(prod, 'minStock', Number(e.target.value) || 0)} className="w-16 text-center bg-gray-50 border border-gray-200 rounded-lg py-1 text-xs font-semibold" />
                             </td>
                             <td className="p-4 text-center">
-                              {isLow ? (
-                                <span className="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-bold">REPOR</span>
-                              ) : (
-                                <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-bold">OK</span>
-                              )}
+                              {isLow ? <span className="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-bold">REPOR</span> : <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-bold">OK</span>}
                             </td>
                             <td className="p-4 text-right space-x-1 whitespace-nowrap">
-                              <button onClick={() => sendProductToPurchases(prod)} title="Enviar para Lista de Compras" className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold hover:bg-amber-200">Comprar</button>
+                              <button onClick={() => sendProductToPurchases(prod)} className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold hover:bg-amber-200">Comprar</button>
                               <button onClick={() => openEditProduct(prod)} className="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-semibold hover:bg-gray-200">Editar</button>
                               <button onClick={() => handleDeleteProduct(prod.id)} className="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-100">Excluir</button>
                             </td>
@@ -809,11 +802,8 @@ export default function App() {
                 <h2 className="text-lg font-bold text-[#2D1B12]">Histórico de Entradas e Saídas</h2>
                 <p className="text-xs text-gray-500">Pesquise o produto pelo código, nome ou setor na hora de lançar.</p>
               </div>
-              <button 
-                onClick={() => { setMoveType('Entrada'); setIsMoveModalOpen(true); }}
-                className="bg-[#2D1B12] text-[#FDFBF7] px-5 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow"
-              >
-                + Nova Movimentação (Entrada / Saída)
+              <button onClick={() => { setMoveType('Entrada'); setIsMoveModalOpen(true); }} className="bg-[#2D1B12] text-[#FDFBF7] px-5 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow">
+                + Nova Movimentação
               </button>
             </div>
 
@@ -828,7 +818,7 @@ export default function App() {
                       <th className="p-4">Produto</th>
                       <th className="p-4">Setor</th>
                       <th className="p-4 text-center">Qtd</th>
-                      <th className="p-4">Funcionário (Retirada/EPI)</th>
+                      <th className="p-4">Funcionário</th>
                       <th className="p-4">Observação</th>
                       <th className="p-4 text-right">Ação</th>
                     </tr>
@@ -840,20 +830,14 @@ export default function App() {
                       movements.map(mov => (
                         <tr key={mov.id} className="hover:bg-[#FDFBF7]/60 transition">
                           <td className="p-4 text-xs text-gray-500">{new Date(mov.date).toLocaleString('pt-BR')}</td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${mov.type === 'Entrada' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                              {mov.type}
-                            </span>
-                          </td>
+                          <td className="p-4"><span className={`px-2.5 py-1 rounded-full text-xs font-bold ${mov.type === 'Entrada' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{mov.type}</span></td>
                           <td className="p-4 text-xs font-bold text-gray-500">{mov.productCode || '-'}</td>
                           <td className="p-4 font-semibold text-[#2D1B12]">{mov.productName}</td>
                           <td className="p-4 text-xs font-bold text-gray-600">{mov.sector}</td>
                           <td className="p-4 text-center font-bold text-base">{mov.qty}</td>
                           <td className="p-4 text-xs font-bold text-[#2D1B12]">{mov.employee || '-'}</td>
                           <td className="p-4 text-xs text-gray-500">{mov.note}</td>
-                          <td className="p-4 text-right">
-                            <button onClick={() => handleDeleteMovement(mov)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">Estornar</button>
-                          </td>
+                          <td className="p-4 text-right"><button onClick={() => handleDeleteMovement(mov)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">Estornar</button></td>
                         </tr>
                       ))
                     )}
@@ -864,30 +848,21 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 3: COMPRAS (COM QUANTIDADE EDITÁVEL A QUALQUER MOMENTO) */}
+        {/* ABA 3: COMPRAS */}
         {activeTab === 'compras' && (
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-[#C5A880]/20">
               <div>
                 <h2 className="text-lg font-bold text-[#2D1B12]">Gestão de Compras e Reposição</h2>
-                <p className="text-xs text-gray-500">
-                  Você pode alterar a <strong>Qtd a Comprar</strong> ou o <strong>Fornecedor</strong> clicando direto nos campos abaixo, mesmo após já ter feito o pedido!
-                </p>
+                <p className="text-xs text-gray-500">Altere a quantidade a comprar ou fornecedor a qualquer momento.</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <select 
-                  value={purchStatusFilter} 
-                  onChange={(e) => setPurchStatusFilter(e.target.value)}
-                  className="py-2 px-3 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm font-semibold"
-                >
+                <select value={purchStatusFilter} onChange={(e) => setPurchStatusFilter(e.target.value)} className="py-2 px-3 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm font-semibold">
                   <option value="Todos">Todos os Status</option>
                   <option value="AGUARDANDO">Aguardando Compra</option>
                   <option value="COMPRADO">Comprado / Recebido</option>
                 </select>
-                <button 
-                  onClick={() => setIsPurchaseModalOpen(true)}
-                  className="bg-[#2D1B12] text-[#FDFBF7] px-5 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow text-sm"
-                >
+                <button onClick={() => setIsPurchaseModalOpen(true)} className="bg-[#2D1B12] text-[#FDFBF7] px-5 py-2.5 rounded-xl font-semibold hover:bg-[#3D261A] transition shadow text-sm">
                   + Adicionar Pedido de Compra
                 </button>
               </div>
@@ -902,8 +877,8 @@ export default function App() {
                       <th className="p-4">Setor</th>
                       <th className="p-4">Cód.</th>
                       <th className="p-4">Descrição</th>
-                      <th className="p-4 text-center">Qtd a Comprar (Editável)</th>
-                      <th className="p-4">Fornecedor (Editável)</th>
+                      <th className="p-4 text-center">Qtd a Comprar</th>
+                      <th className="p-4">Fornecedor</th>
                       <th className="p-4">Data Compra</th>
                       <th className="p-4 text-center">Qtd Comprada</th>
                       <th className="p-4 text-center">Status</th>
@@ -912,7 +887,7 @@ export default function App() {
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-sm">
                     {purchases.filter(p => purchStatusFilter === 'Todos' || p.status === purchStatusFilter).length === 0 ? (
-                      <tr><td colSpan="10" className="p-8 text-center text-gray-400">Nenhum pedido de compra registado.</td></tr>
+                      <tr><td colSpan="10" className="p-8 text-center text-gray-400">Nenhum pedido de compra.</td></tr>
                     ) : (
                       purchases
                         .filter(p => purchStatusFilter === 'Todos' || p.status === purchStatusFilter)
@@ -923,71 +898,25 @@ export default function App() {
                             <td className="p-4 text-xs font-bold text-gray-500">{purch.productCode}</td>
                             <td className="p-4 font-semibold text-[#2D1B12]">{purch.productName}</td>
                             <td className="p-4 text-center">
-                              <input 
-                                type="number" 
-                                min="1"
-                                key={`qty_${purch.id}_${purch.qtyToBuy}`}
-                                defaultValue={purch.qtyToBuy}
-                                onBlur={(e) => {
-                                  const val = Math.max(1, Number(e.target.value) || 1);
-                                  if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val);
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') e.target.blur();
-                                }}
-                                title="Clique para alterar a quantidade a comprar"
-                                className="w-20 text-center bg-[#FDFBF7] border border-[#C5A880]/60 rounded-lg py-1.5 px-2 text-sm font-bold text-[#2D1B12] focus:outline-none focus:ring-2 focus:ring-[#C5A880]"
-                              />
+                              <input type="number" min="1" key={`qty_${purch.id}_${purch.qtyToBuy}`} defaultValue={purch.qtyToBuy} onBlur={(e) => { const val = Math.max(1, Number(e.target.value) || 1); if (val !== purch.qtyToBuy) handleUpdatePurchaseField(purch, 'qtyToBuy', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-20 text-center bg-[#FDFBF7] border border-[#C5A880]/60 rounded-lg py-1.5 px-2 text-sm font-bold text-[#2D1B12]" />
                             </td>
                             <td className="p-4">
-                              <input 
-                                type="text" 
-                                key={`sup_${purch.id}_${purch.supplier}`}
-                                defaultValue={purch.supplier === '-' ? '' : purch.supplier}
-                                placeholder="Adicionar fornecedor..."
-                                onBlur={(e) => {
-                                  const val = e.target.value.trim() || '-';
-                                  if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val);
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') e.target.blur();
-                                }}
-                                className="w-36 bg-[#FDFBF7] border border-gray-200 rounded-lg py-1 px-2 text-xs text-gray-700 focus:outline-none focus:border-[#C5A880]"
-                              />
+                              <input type="text" key={`sup_${purch.id}_${purch.supplier}`} defaultValue={purch.supplier === '-' ? '' : purch.supplier} placeholder="Fornecedor..." onBlur={(e) => { const val = e.target.value.trim() || '-'; if (val !== purch.supplier) handleUpdatePurchaseField(purch, 'supplier', val); }} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} className="w-36 bg-[#FDFBF7] border border-gray-200 rounded-lg py-1 px-2 text-xs text-gray-700" />
                             </td>
                             <td className="p-4 text-xs text-gray-500">{purch.purchaseDate ? new Date(purch.purchaseDate).toLocaleDateString('pt-BR') : '-'}</td>
                             <td className="p-4 text-center font-bold text-green-700">
                               {purch.status === 'COMPRADO' ? (
                                 <div className="flex items-center justify-center gap-1.5">
                                   <span>{purch.qtyBought}</span>
-                                  <button 
-                                    onClick={() => handleEditBoughtQuantity(purch)}
-                                    title="Alterar quantidade comprada e ajustar estoque"
-                                    className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[#2D1B12] rounded text-[11px] font-semibold border border-gray-300"
-                                  >
-                                    Alterar Qtd
-                                  </button>
+                                  <button onClick={() => handleEditBoughtQuantity(purch)} className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[#2D1B12] rounded text-[11px] font-semibold border">Alterar Qtd</button>
                                 </div>
-                              ) : (
-                                '-'
-                              )}
+                              ) : '-'}
                             </td>
                             <td className="p-4 text-center">
-                              {purch.status === 'COMPRADO' ? (
-                                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">COMPRADO</span>
-                              ) : (
-                                <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold">AGUARDANDO</span>
-                              )}
+                              {purch.status === 'COMPRADO' ? <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">COMPRADO</span> : <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold">AGUARDANDO</span>}
                             </td>
                             <td className="p-4 text-right space-x-2 whitespace-nowrap">
-                              {purch.status === 'AGUARDANDO' && (
-                                <button 
-                                  onClick={() => handleConfirmPurchaseReceived(purch)} 
-                                  className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 shadow-sm"
-                                >
-                                  Confirmar Compra
-                                </button>
-                              )}
+                              {purch.status === 'AGUARDANDO' && <button onClick={() => handleConfirmPurchaseReceived(purch)} className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700">Confirmar</button>}
                               <button onClick={() => handleDeletePurchase(purch.id)} className="px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold">Excluir</button>
                             </td>
                           </tr>
@@ -1000,43 +929,25 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 4: FUNCIONÁRIOS E CONTROLE DE EPI */}
+        {/* ABA 4: FUNCIONÁRIOS */}
         {activeTab === 'funcionarios' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-5">
               <div>
                 <h2 className="text-lg font-bold text-[#2D1B12]">Equipa de Funcionários ({employees.length})</h2>
-                <p className="text-xs text-gray-500">Adicione novos funcionários ou exclua colaboradores existentes abaixo.</p>
+                <p className="text-xs text-gray-500">Adicione ou exclua colaboradores abaixo.</p>
               </div>
 
               <form onSubmit={handleAddEmployee} className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Nome completo do funcionário..." 
-                  value={newEmployeeName}
-                  onChange={(e) => setNewEmployeeName(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm focus:outline-none"
-                />
-                <button type="submit" className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#3D261A] whitespace-nowrap">
-                  + Adicionar
-                </button>
+                <input type="text" placeholder="Nome completo..." value={newEmployeeName} onChange={(e) => setNewEmployeeName(e.target.value)} className="flex-1 px-3 py-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-sm focus:outline-none" />
+                <button type="submit" className="bg-[#2D1B12] text-[#FDFBF7] px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#3D261A] whitespace-nowrap">+ Adicionar</button>
               </form>
 
               <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100 border rounded-xl">
                 {employees.map(emp => (
                   <div key={emp.id} className="p-3 flex justify-between items-center hover:bg-gray-50 gap-2">
-                    <button 
-                      onClick={() => setSelectedEmpForHistory(emp.name)}
-                      className={`text-xs font-bold text-left flex-1 ${selectedEmpForHistory === emp.name ? 'text-[#C5A880] underline' : 'text-[#2D1B12]'}`}
-                    >
-                      {emp.name}
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteEmployee(emp)}
-                      className="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg font-semibold"
-                    >
-                      Excluir
-                    </button>
+                    <button onClick={() => setSelectedEmpForHistory(emp.name)} className={`text-xs font-bold text-left flex-1 ${selectedEmpForHistory === emp.name ? 'text-[#C5A880] underline' : 'text-[#2D1B12]'}`}>{emp.name}</button>
+                    <button onClick={() => handleDeleteEmployee(emp)} className="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg font-semibold">Excluir</button>
                   </div>
                 ))}
               </div>
@@ -1046,13 +957,9 @@ export default function App() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
                 <div>
                   <h3 className="text-lg font-bold text-[#2D1B12]">Histórico de Retiradas / EPIs por Funcionário</h3>
-                  <p className="text-xs text-gray-500">Clique num funcionário na lista ao lado para filtrar as retiradas dele.</p>
+                  <p className="text-xs text-gray-500">Filtre por colaborador.</p>
                 </div>
-                <select 
-                  value={selectedEmpForHistory}
-                  onChange={(e) => setSelectedEmpForHistory(e.target.value)}
-                  className="p-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-xs font-bold"
-                >
+                <select value={selectedEmpForHistory} onChange={(e) => setSelectedEmpForHistory(e.target.value)} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/40 rounded-xl text-xs font-bold">
                   <option value="Todos">Todos os Funcionários</option>
                   {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
                 </select>
@@ -1092,27 +999,118 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 5: RESUMO E RELATÓRIOS */}
+        {/* ABA 5: RESUMO E RELATÓRIOS (COM FILTRO POR SETOR, MÊS, PERÍODO DE ATÉ 1 ANO E ALERTA DE ESTOQUE MÍNIMO) */}
         {activeTab === 'resumo' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {SECTORS.map(sec => {
-                const secProds = products.filter(p => p.sector === sec);
-                const secLow = secProds.filter(p => p.stock <= p.minStock).length;
-                return (
-                  <div key={sec} className="bg-white p-5 rounded-2xl shadow-sm border border-[#C5A880]/20">
-                    <p className="text-xs font-bold text-gray-500 uppercase">{sec}</p>
-                    <p className="text-2xl font-bold text-[#2D1B12] mt-1">{secProds.length} itens</p>
-                    <p className="text-xs font-semibold text-red-600 mt-1">{secLow} a repor</p>
-                  </div>
-                );
-              })}
+            {/* Secção de Controlo de Filtros de Resumo */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#C5A880]/20 flex flex-wrap gap-4 items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-[#2D1B12]">Filtros do Relatório e Resumo</h3>
+                <p className="text-xs text-gray-500">Separe por setor, mês ou selecione o período desejado (até 1 ano).</p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 items-center">
+                {/* Filtro por Setor */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-gray-600 mb-1">Setor</label>
+                  <select value={summarySector} onChange={(e) => setSummarySector(e.target.value)} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-xs font-bold">
+                    <option value="Todos">Todos os Setores</option>
+                    {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                {/* Filtro por Período em Meses (Até 1 Ano) */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-gray-600 mb-1">Período Recente</label>
+                  <select value={summaryPeriodMonths} onChange={(e) => { setSummaryPeriodMonths(e.target.value); setSummaryMonth('Todos'); }} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-xs font-bold">
+                    <option value="1">Último Mês (30 dias)</option>
+                    <option value="3">Últimos 3 Meses</option>
+                    <option value="6">Últimos 6 Meses</option>
+                    <option value="12">Último 1 Ano (12 meses)</option>
+                  </select>
+                </div>
+
+                {/* Filtro por Mês Específico */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-gray-600 mb-1">Mês Específico</label>
+                  <select value={summaryMonth} onChange={(e) => setSummaryMonth(e.target.value)} className="p-2 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-xs font-bold">
+                    <option value="Todos">Todos os meses do período</option>
+                    {availableMonths.map(m => (
+                      <option key={m} value={m}>{m.split('-').reverse().join('/')}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* ALERTA DE PRODUTOS EM ESTOQUE MÍNIMO */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-red-200 space-y-4">
+              <div className="flex justify-between items-center border-b pb-3">
+                <div>
+                  <h3 className="text-lg font-bold text-red-700 flex items-center gap-2">
+                    <span>⚠️ Produtos em Estoque Mínimo ou Abaixo:</span>
+                    <span className="bg-red-100 text-red-800 px-3 py-0.5 rounded-full text-sm font-extrabold">{lowStockProducts.length} itens</span>
+                  </h3>
+                  <p className="text-xs text-gray-500">Estes itens atingiram o limite de segurança e precisam de reposição imediata.</p>
+                </div>
+              </div>
+
+              {lowStockProducts.length === 0 ? (
+                <p className="text-sm text-green-700 font-semibold py-4 text-center bg-green-50 rounded-xl">Parabéns! Nenhum produto abaixo do estoque mínimo no filtro atual.</p>
+              ) : (
+                <div className="overflow-x-auto max-h-72 overflow-y-auto border rounded-xl">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-700 text-xs uppercase font-bold sticky top-0">
+                        <th className="p-3">Código</th>
+                        <th className="p-3">Produto</th>
+                        <th className="p-3">Setor</th>
+                        <th className="p-3 text-center">Estoque Atual</th>
+                        <th className="p-3 text-center">Estoque Mínimo</th>
+                        <th className="p-3 text-right">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {lowStockProducts.map(p => (
+                        <tr key={p.id} className="hover:bg-red-50/40">
+                          <td className="p-3 text-xs font-bold text-gray-500">{p.code || '-'}</td>
+                          <td className="p-3 font-semibold text-[#2D1B12]">{p.name}</td>
+                          <td className="p-3 text-xs font-bold">{p.sector}</td>
+                          <td className="p-3 text-center font-extrabold text-red-600">{p.stock}</td>
+                          <td className="p-3 text-center font-bold text-gray-600">{p.minStock}</td>
+                          <td className="p-3 text-right">
+                            <button onClick={() => sendProductToPurchases(p)} className="px-3 py-1 bg-amber-100 text-amber-900 rounded-lg text-xs font-bold hover:bg-amber-200">Adicionar à Compra</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* RESUMO DE ENTRADAS E SAÍDAS NO PERÍODO SELECIONADO */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-3">
+                <h4 className="font-bold text-[#2D1B12] border-b pb-2 flex justify-between">
+                  <span>Total de Entradas</span>
+                  <span className="text-green-700">{filteredMovementsForSummary.filter(m => m.type === 'Entrada').reduce((acc, m) => acc + m.qty, 0)} un.</span>
+                </h4>
+                <p className="text-xs text-gray-500">Lançamentos de compras e reposições no período.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20 space-y-3">
+                <h4 className="font-bold text-[#2D1B12] border-b pb-2 flex justify-between">
+                  <span>Total de Saídas / EPIs</span>
+                  <span className="text-orange-700">{filteredMovementsForSummary.filter(m => m.type === 'Saída').reduce((acc, m) => acc + m.qty, 0)} un.</span>
+                </h4>
+                <p className="text-xs text-gray-500">Retiradas e consumo pela equipa no período.</p>
+              </div>
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-[#C5A880]/20">
               <div>
-                <h2 className="text-xl font-bold text-[#2D1B12]">Exportação de Relatórios (12 Meses)</h2>
-                <p className="text-xs text-gray-500">Exporte toda a relação de Entradas, Saídas e Retiradas por Funcionário para Excel.</p>
+                <h2 className="text-xl font-bold text-[#2D1B12]">Exportação de Relatórios</h2>
+                <p className="text-xs text-gray-500">Exporte os dados filtrados para Excel ou PDF.</p>
               </div>
               <div className="flex gap-3">
                 <button onClick={exportCSV} className="bg-[#C5A880] text-[#2D1B12] px-4 py-2.5 rounded-xl font-bold hover:bg-[#B3976F] transition shadow text-sm">
@@ -1175,7 +1173,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL LANÇAR MOVIMENTAÇÃO (COM BUSCA POR CÓDIGO, NOME E SETOR) */}
+      {/* MODAL LANÇAR MOVIMENTAÇÃO */}
       {isMoveModalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
@@ -1187,54 +1185,29 @@ export default function App() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">1. Filtrar Setor</label>
-                  <select 
-                    value={moveSectorFilter} 
-                    onChange={(e) => {
-                      setMoveSectorFilter(e.target.value);
-                      const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value);
-                      if (first) setMoveProductId(first.id);
-                    }} 
-                    className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-bold"
-                  >
+                  <select value={moveSectorFilter} onChange={(e) => { setMoveSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setMoveProductId(first.id); }} className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-bold">
                     <option value="Todos">Todos os Setores</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">2. Buscar Código ou Nome</label>
-                  <input 
-                    type="text" 
-                    value={moveSearchQuery} 
-                    onChange={(e) => {
-                      setMoveSearchQuery(e.target.value);
-                      const q = e.target.value.toLowerCase().trim();
-                      const first = products.find(p => (moveSectorFilter === 'Todos' || p.sector === moveSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q));
-                      if (first) setMoveProductId(first.id);
-                    }} 
-                    placeholder="Digite cód (ex: 51) ou nome..." 
-                    className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-semibold" 
-                  />
+                  <input type="text" value={moveSearchQuery} onChange={(e) => { setMoveSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (moveSectorFilter === 'Todos' || p.sector === moveSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setMoveProductId(first.id); }} placeholder="Digite cód ou nome..." className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-semibold" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase mb-1">3. Produto Selecionado ({moveFilteredProducts.length} encontrados)</label>
-                <select 
-                  value={moveProductId} 
-                  onChange={(e) => setMoveProductId(e.target.value)} 
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold"
-                >
+                <select value={moveProductId} onChange={(e) => setMoveProductId(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold">
                   {moveFilteredProducts.map(p => (
-                    <option key={p.id} value={p.id}>
-                      [{p.code}] {p.name} ({p.sector}) — Saldo: {p.stock}
-                    </option>
+                    <option key={p.id} value={p.id}>[{p.code}] {p.name} ({p.sector}) — Saldo: {p.stock}</option>
                   ))}
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Lançamento</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo</label>
                   <select value={moveType} onChange={(e) => setMoveType(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold">
                     <option value="Entrada">Entrada (Compra / Retorno)</option>
                     <option value="Saída">Saída (Uso / Retirada EPI)</option>
@@ -1248,7 +1221,7 @@ export default function App() {
 
               {moveType === 'Saída' && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Funcionário que Retirou (Obrigatório para EPI)</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Funcionário que Retirou</label>
                   <select value={moveEmployee} onChange={(e) => setMoveEmployee(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold">
                     <option value="-">Sem funcionário específico</option>
                     {employees.map(emp => <option key={emp.id} value={emp.name}>{emp.name}</option>)}
@@ -1258,7 +1231,7 @@ export default function App() {
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Observação</label>
-                <input type="text" value={moveNote} onChange={(e) => setMoveNote(e.target.value)} placeholder="Nota fiscal, fornecedor ou motivo..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                <input type="text" value={moveNote} onChange={(e) => setMoveNote(e.target.value)} placeholder="Motivo ou observação..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
               </div>
 
               <div className="flex justify-end gap-3 pt-3 border-t">
@@ -1282,33 +1255,14 @@ export default function App() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Filtrar Setor</label>
-                  <select 
-                    value={purchSectorFilter} 
-                    onChange={(e) => {
-                      setPurchSectorFilter(e.target.value);
-                      const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value);
-                      if (first) setPurchProductId(first.id);
-                    }} 
-                    className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-bold"
-                  >
+                  <select value={purchSectorFilter} onChange={(e) => { setPurchSectorFilter(e.target.value); const first = products.find(p => e.target.value === 'Todos' || p.sector === e.target.value); if (first) setPurchProductId(first.id); }} className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm font-bold">
                     <option value="Todos">Todos os Setores</option>
                     {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Buscar por Código ou Nome</label>
-                  <input 
-                    type="text" 
-                    value={purchSearchQuery} 
-                    onChange={(e) => {
-                      setPurchSearchQuery(e.target.value);
-                      const q = e.target.value.toLowerCase().trim();
-                      const first = products.find(p => (purchSectorFilter === 'Todos' || p.sector === purchSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q));
-                      if (first) setPurchProductId(first.id);
-                    }} 
-                    placeholder="Digite código ou nome..." 
-                    className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm" 
-                  />
+                  <input type="text" value={purchSearchQuery} onChange={(e) => { setPurchSearchQuery(e.target.value); const q = e.target.value.toLowerCase().trim(); const first = products.find(p => (purchSectorFilter === 'Todos' || p.sector === purchSectorFilter) && (p.name.toLowerCase().includes(q) || String(p.code || '').toLowerCase() === q)); if (first) setPurchProductId(first.id); }} placeholder="Digite código ou nome..." className="w-full p-3 bg-[#FDFBF7] border border-[#C5A880]/50 rounded-xl text-sm" />
                 </div>
               </div>
 
@@ -1328,7 +1282,7 @@ export default function App() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Fornecedor (Opcional)</label>
-                  <input type="text" value={purchSupplier} onChange={(e) => setPurchSupplier(e.target.value)} placeholder="Nome do fornecedor..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+                  <input type="text" value={purchSupplier} onChange={(e) => setPurchSupplier(e.target.value)} placeholder="Fornecedor..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
                 </div>
               </div>
 
